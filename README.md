@@ -1,5 +1,5 @@
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/946806d4-7237-421c-932a-bd2fdb913b5d" />
-
+   
 <p align="center">
   <img src="./reflexhon_logo_dark.svg" width="96" height="96" alt="Reflexhon logo">
 <img src="https://sahidattaf.github.io/reflexhon-global/reflexhon_logo_dark.svg" width="96" height="96" alt="Reflexhon logo">
@@ -94,6 +94,7 @@ Ta un AI ku siña pa reflehá:
 🔗 [**Reflexhon Deck (HTML)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)  
 📘 [**Reflexhon Workspace (Markdown)**](./reflexhon_workspace.md)  
 🪞 [**Reflexhon Embed Deck (pa Notion)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html)  
+🔗 [View Reflexhon Deck](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
 
 
 ---
