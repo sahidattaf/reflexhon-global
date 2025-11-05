@@ -94,6 +94,8 @@ Ta un AI ku siña pa reflehá:
 🔗 [**Reflexhon Deck (HTML)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)  
 📘 [**Reflexhon Workspace (Markdown)**](./reflexhon_workspace.md)  
 🪞 [**Reflexhon Embed Deck (pa Notion)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html)  
+chmod +x setup_reflexhon_launch.sh
+./setup_reflexhon_launch.sh
 
 ---
 
