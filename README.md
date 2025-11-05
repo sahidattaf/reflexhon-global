@@ -95,11 +95,7 @@ Ta un AI ku siña pa reflehá:
 📘 [**Reflexhon Workspace (Markdown)**](./reflexhon_workspace.md)  
 🪞 [**Reflexhon Embed Deck (pa Notion)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html)  
 🔗 [View Reflexhon Deck](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
-
 📘 [🤝 Komunidad & Kontribushon](COMMUNITY.md)
-
-
-
 
 ---
 
