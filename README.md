@@ -1,5 +1,22 @@
+<p align="center">
+  <img src="./public/reflexhon_mark.svg" width="96" height="96" alt="Reflexhon logo"><br/>
+  <strong>🌍 Reflexhon Global 2027</strong><br/>
+  <em>Human-Centered Intelligence Ecosystem</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-In%20Development-FFC772?style=for-the-badge&logo=github&logoColor=white&labelColor=0b1020">
+  <img src="https://img.shields.io/badge/Version-0.9.0-3CCAC6?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=0b1020">
+  <img src="https://img.shields.io/badge/License-MIT-315DFF?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=0b1020">
+  <img src="https://img.shields.io/badge/AI_Core-Active-3CCAC6?style=for-the-badge&logo=openai&logoColor=white&labelColor=0b1020">
+  <img src="https://img.shields.io/badge/ReflexCoin-Ethical_Economy-FFC772?style=for-the-badge&logo=bitcoin&logoColor=white&labelColor=0b1020">
+</p>
+
+---
+
+
 # 🌍 Reflexhon Global 2027  
-<!-- Reflexhon Global – Status Badges -->
+<!-Reflexhon Global – Status Badges -->
 <p align="center">
   <img src="https://img.shields.io/badge/Status-In%20Development-FFC772?style=for-the-badge&logo=github&logoColor=white&labelColor=0b1020" alt="Status: In Development">
   <img src="https://img.shields.io/badge/Version-0.9.0-3CCAC6?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=0b1020" alt="Version">
