@@ -1,3 +1,4 @@
+mv CODE_OF_CONDUCT.md path/to/reflexhon-global/
 # 🌈 Reflexhon Global – Code of Conduct
 
 🤝 **Un AI ku ta reflehá humanidad, mester siña respetá humanidad.**
