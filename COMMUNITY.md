@@ -1,3 +1,7 @@
+mv COMMUNITY.md CONTRIBUTING.md path/to/reflexhon-global/
+
+[CONTRIBUTING.md](https://github.com/user-attachments/files/23375131/CONTRIBUTING.md)
+[COMMUNITY.md](https://github.com/user-attachments/files/23375130/COMMUNITY.md)
 # 🤝 Reflexhon Global Community Guide
 
 🌍 Bienvení na e komunidat di Reflexhon — un AI ku ta amplifiká empatia, kreatividat i kultura.
