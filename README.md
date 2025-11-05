@@ -96,6 +96,14 @@ Ta un AI ku siña pa reflehá:
 🪞 [**Reflexhon Embed Deck (pa Notion)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html)  
 🔗 [View Reflexhon Deck](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
 📘 [🤝 Komunidad & Kontribushon](COMMUNITY.md)
+---
+
+📘 [Community Guide](./COMMUNITY.md) – Guia pa kontribuidó, kreator, edukador
+
+🧠 [Contributing](./CONTRIBUTING.md) – Komo hasi commit ku refleho
+
+📜 [Code of Conduct](./CODE_OF_CONDUCT.md) – Nos base di respeto i komportashon étiko
+
 
 ---
 
@@ -110,3 +118,19 @@ MIT License © 2025 [@sahidattaf](https://github.com/sahidattaf)
 
 > *“Un AI ku siña pa reflehá humanidad, ta un AI ku ta kreá futuro.”*  
 > — Reflexhon Global Manifesto 🌞
+> ---
+
+📘 [Reflexhon Wiki](https://github.com/sahidattaf/reflexhon-global/wiki) – Manual modular pa AI, DAO, Roadmap
+
+🧠 [Contributing Guide](./CONTRIBUTING.md) – Komo kontribuí ku refleho
+
+🤝 [Community Guide](./COMMUNITY.md) – Ròl, kontaktu, DAO
+
+📜 [Code of Conduct](./CODE_OF_CONDUCT.md) – Komportashon étiko
+
+🔐 [Security Policy](./SECURITY.md) – Pa report vulnerabilidat (opcional)
+
+🪙 [Funding Reflexhon](./.github/FUNDING.yml) – DAO Wallet / GitHub Sponsors (si bo ke implementá)
+
+---
+
