@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reflexhon Global 2027 — Deck</title>
+<style>
+  :root{
+    --amber:#FFC772;
+    --turkesa:#3CCAC6;
+    --zafiro:#315DFF;
+    --ink:#0f172a;
+    --paper:#0b1020;
+    --muted:#93a4c7;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial;
+    color:white;
+    background: radial-gradient(1200px 800px at 10% -10%, rgba(49,93,255,0.25), transparent 60%),
+                radial-gradient(1200px 800px at 110% 10%, rgba(60,202,198,0.25), transparent 60%),
+                linear-gradient(180deg, #0b1020, #0a0d18 40%, #070a13);
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:40px 20px}
+  .brand{display:flex;align-items:center;gap:.75rem;margin-bottom:10px}
+  .brand-logo{
+    width:36px;height:36px;border-radius:12px;
+    background: conic-gradient(from 210deg, var(--amber), var(--turkesa), var(--zafiro));
+    box-shadow: 0 0 40px rgba(255,199,114,.35), inset 0 0 30px rgba(60,202,198,.2);
+  }
+  h1{font-size:clamp(28px, 6vw, 56px); line-height:1.05; margin:0 0 8px}
+  .subtitle{color:var(--muted); font-size:clamp(14px, 2.2vw, 18px)}
+  .grid{display:grid; gap:16px; grid-template-columns: repeat(12, 1fr); margin-top:28px}
+  .card{
+    grid-column: span 12;
+    background: rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px; padding:20px 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    backdrop-filter: blur(6px);
+  }
+  @media(min-width:860px){
+    .span-6{grid-column: span 6;}
+    .span-4{grid-column: span 4;}
+    .span-8{grid-column: span 8;}
+  }
+  .badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .7rem;border-radius:999px;
+    border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05); color:#e6edf7; font-weight:600; font-size:12px; letter-spacing:.4px}
+  .kpi{display:flex; gap:18px; flex-wrap:wrap}
+  .kpi .pill{flex:1 1 180px; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px 16px; background:rgba(255,255,255,.04)}
+  .pill h4{margin:0 0 4px; font-size:14px; color:#d7e2ff}
+  .pill p{margin:0; color:var(--muted); font-size:13px}
+  details{border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden; background:rgba(255,255,255,.03); margin:12px 0}
+  summary{cursor:pointer; padding:16px 18px; font-weight:700; list-style:none; position:relative}
+  summary::-webkit-details-marker{display:none}
+  details[open] summary{background:linear-gradient(90deg, rgba(255,199,114,.15), rgba(60,202,198,.12));}
+  .content{padding:16px 18px; color:#cbd5e1; border-top:1px solid rgba(255,255,255,.08)}
+  .row{display:grid; grid-template-columns:1.2fr 1fr; gap:16px}
+  .flow{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  .chip{padding:.35rem .6rem; border-radius:999px; border:1px solid rgba(255,255,255,.18); font-size:12px; color:#dce6ff}
+  .arrow{opacity:.6}
+  .footer{margin-top:32px; color:#9fb0d8; font-size:12px}
+  .accent{background:linear-gradient(90deg, var(--amber), var(--turkesa)); -webkit-background-clip:text; background-clip:text; color:transparent}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand"><div class="brand-logo"></div><div>Reflexhon Global 2027</div></div>
+    <h1>Human‑Centered <span class="accent">Intelligence</span> Ecosystem</h1>
+    <div class="subtitle">AI ku ta siña pa amplifiká kreatividat, empatia i razonamentu — no pa suplantá humano.</div>
+
+    <div class="grid">
+      <div class="card span-8">
+        <span class="badge">🎯 Visión & Misión</span>
+        <p style="margin-top:10px;color:#cbd5e1;">
+          Kreá un AI adaptivo i étiko ku ta forma un ekonomia nobo basá riba kontribushon real (arte, idea, edukashon).
+          Construí kolaborashon global den kultura i idioma lokal.
+        </p>
+        <details>
+          <summary>🪶 Pilares Fundamentál</summary>
+          <div class="content">
+            <ul>
+              <li><b>Human‑Centered Intelligence:</b> RL étiko, bienestar humano komo metrika.</li>
+              <li><b>ReflexCoin Economy:</b> token pa premi kontribushon útil — sin spekulashon.</li>
+              <li><b>Reflexhon Core:</b> Reasoning, Creative i Empathic layers.</li>
+              <li><b>Community Treasury:</b> DAO ku transparensia 100% pa edukashon i kultura.</li>
+              <li><b>ReflexMarket:</b> marketplace ku royalties justu pa kreatornan.</li>
+            </ul>
+          </div>
+        </details>
+        <details open>
+          <summary>🔁 Círculo di Valor</summary>
+          <div class="content">
+            <div class="flow">
+              <span class="chip">Creators</span><span class="arrow">→</span>
+              <span class="chip">AI Core</span><span class="arrow">→</span>
+              <span class="chip">Marketplace</span><span class="arrow">→</span>
+              <span class="chip">Treasury</span><span class="arrow">→</span>
+              <span class="chip">ReflexCoin</span><span class="arrow">→</span>
+              <span class="chip">Creators</span>
+            </div>
+            <ul>
+              <li>💰 Valor ekonomiko (ingresonan sostenibel)</li>
+              <li>🧩 Valor edukativo (transferensia di skill)</li>
+              <li>💫 Valor humano (konektividat i alegria)</li>
+            </ul>
+          </div>
+        </details>
+        <details>
+          <summary>📊 KPI 2027</summary>
+          <div class="content kpi">
+            <div class="pill"><h4>👥 Users aktivo</h4><p>2M den 50+ pais</p></div>
+            <div class="pill"><h4>🎨 Obras registrá</h4><p>10M (arte + edukashon)</p></div>
+            <div class="pill"><h4>🌎 Komunidat lokal</h4><p>150 DAO hubs</p></div>
+            <div class="pill"><h4>📈 Retention</h4><p>≥ 80% fokus riba valor real</p></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="card span-4">
+        <span class="badge">⚙️ Teknologia Global</span>
+        <ul style="color:#cbd5e1; padding-left:18px; line-height:1.6">
+          <li>Frontend: WebAssembly + Next.js + Tailwind</li>
+          <li>Backend: Node/Nest + Prisma + Redis Mesh</li>
+          <li>AI Mesh: RL ku policy personal i kultural</li>
+          <li>Storage: IPFS + R2 + Semantic Cache</li>
+          <li>Ethic Guard: bias audit layer</li>
+        </ul>
+        <details>
+          <summary>🧠 AI Layers</summary>
+          <div class="content">
+            <ol>
+              <li>Reasoning Layer (decision étiko)</li>
+              <li>Creative Layer (generashon multimodal)</li>
+              <li>Empathic Layer (entonashon humano)</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+
+      <div class="card span-6">
+        <span class="badge">💼 Modelo di Negoshio</span>
+        <ul style="color:#cbd5e1; padding-left:18px; line-height:1.6">
+          <li>Free — akses bàsiko + ReflexCoin earning</li>
+          <li>Pro — AI full + ReflexMarket</li>
+          <li>Org — DAO + API integrashon pa institushon</li>
+        </ul>
+        <details>
+          <summary>🌱 Impacto Sosial & Ambiental</summary>
+          <div class="content">
+            Edukashon libre, preservashon di idioma lokal, green AI infra, i ingreso étiko pa kreatornan.
+          </div>
+        </details>
+      </div>
+
+      <div class="card span-6">
+        <span class="badge">🗺️ Roadmap 2024 → 2027</span>
+        <div class="row">
+          <div>
+            <details open><summary>Fase 1 — Studio + Coin Pilot</summary>
+            <div class="content">MVP di Reflexhon Studio, pilot ReflexCoin, 3 komunidat lokal.</div></details>
+            <details><summary>Fase 2 — Market + Treasury DAO</summary>
+            <div class="content">Launch di Marketplace, DAO pa grants, programa edukativo global.</div></details>
+            <details><summary>Fase 3 — Mesh AI Global</summary>
+            <div class="content">AI multilingüe i multicultural; ekonomia full‑opsionál.</div></details>
+          </div>
+          <div>
+            <details><summary>Ethical Charter</summary>
+            <div class="content">
+              ✅ AI pa humano • ✅ Transparensia • ✅ Redistribushon di valor • ✅ Empatia • ✅ Zero diskriminashon linguístiko
+            </div></details>
+            <details><summary>Design Filosófik</summary>
+            <div class="content">Amber (razonamentu), Turkesa (kreatividat), Zafiro (refleho). Micro‑animashon pa flow state.</div></details>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">© 2025 Reflexhon Global — Deck interaktivo. Importa e kontení na Notion òf úsa direktamente den navègadó.</div>
+  </div>
+</body>
+</html>
