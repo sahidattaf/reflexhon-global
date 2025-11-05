@@ -104,6 +104,7 @@ Ta un AI ku siña pa reflehá:
 
 📜 [Code of Conduct](./CODE_OF_CONDUCT.md) – Nos base di respeto i komportashon étiko
 
+📘 [Slack Guide](./reflexhon_slack_guide.md) – Komunikashon étiko i kanal di koordinashon.
 
 ---
 
