@@ -1,6 +1,18 @@
 # reflexhon-global
 “Reflexhon Global – Human-Centered AI Ecosystem: creative intelligence, ethical economy, and cultural reflection.”
 # 🌍 Reflexhon Global 2027  
+<!-- Reflexhon Global – Status Badges -->
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-In%20Development-FFC772?style=for-the-badge&logo=github&logoColor=white&labelColor=0b1020" alt="Status: In Development">
+  <img src="https://img.shields.io/badge/Version-0.9.0-3CCAC6?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=0b1020" alt="Version">
+  <img src="https://img.shields.io/badge/License-MIT-315DFF?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=0b1020" alt="License">
+  <img src="https://img.shields.io/badge/AI_Core-Active-3CCAC6?style=for-the-badge&logo=openai&logoColor=white&labelColor=0b1020" alt="AI Core Status">
+  <img src="https://img.shields.io/badge/ReflexCoin-Ethical_Economy-FFC772?style=for-the-badge&logo=bitcoin&logoColor=white&labelColor=0b1020" alt="ReflexCoin Badge">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Built_with❤️by-Reflexhon_Global_Team-315DFF?style=flat-square&labelColor=0b1020&logo=github-sponsors&logoColor=white" alt="Team Badge">
+</p>
 
 
 > **Human-Centered Intelligence Ecosystem**  
