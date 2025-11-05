@@ -1,5 +1,7 @@
+
 <p align="center">
-  <img src="./public/reflexhon_mark.svg" width="96" height="96" alt="Reflexhon logo"><br/>
+  <img src="./reflexhon_logo_dark.svg" width="96" height="96" alt="Reflexhon logo">
+<img src="https://sahidattaf.github.io/reflexhon-global/reflexhon_logo_dark.svg" width="96" height="96" alt="Reflexhon logo">
   <strong>🌍 Reflexhon Global 2027</strong><br/>
   <em>Human-Centered Intelligence Ecosystem</em>
 </p>
