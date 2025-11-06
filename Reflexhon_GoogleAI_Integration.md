@@ -1,3 +1,4 @@
+[Reflexhon + Google AI Studio_ Transforming GPT Innovation by Attaf.pdf](https://github.com/user-attachments/files/23396052/Reflexhon.%2B.Google.AI.Studio_.Transforming.GPT.Innovation.by.Attaf.pdf)
 # 🌍 Reflexhon + Google AI Studio Integration Plan
 ### *Building the Human-Centered Intelligence Ecosystem*
 
