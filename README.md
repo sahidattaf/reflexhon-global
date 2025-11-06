@@ -104,6 +104,7 @@ Ta un AI ku siña pa reflehá:
 
 💬 [Slack Guide](./docs/reflexhon_slack_guide.md)
 
+📘 [Reflexhon Google AI Integration Plan](./Reflexhon_GoogleAI_Integration.md)
 
 ---
 
