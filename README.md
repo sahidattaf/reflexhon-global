@@ -68,6 +68,8 @@ Ta un AI ku siña pa reflehá:
 ---
 
 ## ⚙️ **Teknologia & Arkitektura**
+📘 [Local Setup Guide](./setup_reflexhon_local.md)
+
 - **Frontend:** Next.js + Tailwind + WebAssembly  
 - **Backend:** Node/Nest + Prisma + Redis Mesh  
 - **AI Mesh:** RL policies ku konteksto kultural  
@@ -96,6 +98,9 @@ Ta un AI ku siña pa reflehá:
 🪞 [**Reflexhon Embed Deck (pa Notion)**](https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html)  
 🔗 [View Reflexhon Deck](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
 📘 [🤝 Komunidad & Kontribushon](COMMUNITY.md)
+
+📘 [Local Setup Guide](./setup_reflexhon_local.md)
+
 ---
 
 📘 [Community Guide](./COMMUNITY.md) – Guia pa kontribuidó, kreator, edukador
