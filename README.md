@@ -99,7 +99,11 @@ Ta un AI ku siña pa reflehá:
 🔗 [View Reflexhon Deck](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
 📘 [🤝 Komunidad & Kontribushon](COMMUNITY.md)
 
-📘 [Local Setup Guide](./setup_reflexhon_local.md)
+
+📘 [Local Setup Guide](./docs/setup_reflexhon_local.md)  
+
+💬 [Slack Guide](./docs/reflexhon_slack_guide.md)
+
 
 ---
 
@@ -136,7 +140,11 @@ MIT License © 2025 [@sahidattaf](https://github.com/sahidattaf)
 
 🔐 [Security Policy](./SECURITY.md) – Pa report vulnerabilidat (opcional)
 
-🪙 [Funding Reflexhon](./.github/FUNDING.yml) – DAO Wallet / GitHub Sponsors (si bo ke implementá)
+🪙 4️⃣ Funding & Sponsors section
+🪙 [Funding Reflexhon](./.github/FUNDING.yml) – DAO Wallet / GitHub Sponsors 💖 **Support Reflexhon**
+Si bo ke sostené AI étiko i edukashon lokal:
+[Become a Sponsor](https://github.com/sponsors/sahidattaf)
+
 
 ---
 
