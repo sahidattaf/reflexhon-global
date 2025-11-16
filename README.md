@@ -18,7 +18,7 @@
 🔗 **Direct Links**
 - 🎨 [Reflexhon Deck (HTML)](https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html)
 - 📘 [Reflexhon Workspace (Markdown)](https://sahidattaf.github.io/reflexhon-global/public/reflexhon_workspace.md)
-- 💬 [Slack Guide](https://github.com/sahidattaf/reflexhon-global/blob/main/docs/reflexhon_slack_guide.md)
+- 💬 [Slack Guide] https://github.com/sahidattaf/reflexhon-global/commit/e1be90ea57760ca98e37a10ffd70b20be3b27667
 - 🧠 [Local Setup Guide](https://github.com/sahidattaf/reflexhon-global/blob/main/docs/setup_reflexhon_local.md)
 - 📘 [Reflexhon Wiki – Manual modular pa AI, DAO, Roadmap.](https://github.com/sahidattaf/reflexhon-global/blob/main/wiki/README.md)
 
