@@ -1,13 +1,3 @@
-ai/
-ai/models/
-ai/spaces/
-ai/datasets/
-
-docs/
-docs/guides/
-docs/integration/
-
-huggingface/
-huggingface/spaces/
-huggingface/models/
-huggingface/datasets/
+ai/models/         → Model files, config, weights  
+ai/spaces/         → Hugging Face Spaces apps (UI demos)
+ai/datasets/       → Datasets used to train or align Reflexhon AI
