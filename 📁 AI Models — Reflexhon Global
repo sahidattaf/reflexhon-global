@@ -1,0 +1,25 @@
+📁 AI Models — Reflexhon Global
+
+This folder contains all AI model assets used by Reflexhon Global, including weights, configuration files, adapters, or Hugging Face-ready exports.
+Structure
+ai/models/         → Model files, config, weights  
+ai/spaces/         → Hugging Face Spaces apps (UI demos)
+ai/datasets/       → Datasets used to train or align Reflexhon AI
+Purpose
+
+Store exported models
+
+Store fine-tuning adapters (LoRA, PEFT, etc.)
+
+Maintain model cards for Hugging Face
+
+Track model versions used by Reflexhon Creator Studio
+
+Notes
+
+Do not push large weights directly (use HF repo or LFS)
+
+Add a model-card.md for each model
+
+Keep versions semantic: v0.1, v0.2, etc.
+
