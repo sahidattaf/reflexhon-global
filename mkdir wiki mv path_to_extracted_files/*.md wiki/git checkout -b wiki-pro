@@ -1,3 +1,0 @@
-mkdir wiki
-mv path_to_extracted_files/*.md wiki/
-git checkout -b wiki-pro
