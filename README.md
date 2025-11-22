@@ -1,50 +1,92 @@
-# Reflexhon Cultural Alignment dataset
-🌟 Human-Centered AI Foundation — Reflexhon Methodology
+<div align="center">
+  <img src="reflexhon_logo_dark.svg" height="120"/>
 
-Reflexhon ta sigui un framework di AI humano-centristiko ku ta basa riba 3 pilar:
+# 🌍 **Reflexhon Global 2027**
+### *Human-Centered Intelligence Ecosystem*
 
-1. 🧠 Persona Layer
+[![Status: In Development](https://img.shields.io/badge/Status-In%20Development-FFC772?style=for-the-badge&logo=github)]()
+[![Version](https://img.shields.io/badge/Version-0.9.0-3CCAC6?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-315DFF?style=for-the-badge)]()
+[![AI Core](https://img.shields.io/badge/AI_Core-Active-3CCAC6?style=for-the-badge&logo=openaigym)]()
+[![ReflexCoin](https://img.shields.io/badge/ReflexCoin-Ethical_Economy-FFC772?style=for-the-badge)]()
+</div>
 
-Un identidad AI ku ta krea konsistensia humano den tur output.
-Kontené:
+---
 
-Core values: clarity, empathy, creativity, respect
+# 🌞 **Visión**
+Reflexhon Global ta un ekosistema di AI ku ta amplifiká humanidad, kreatividat i empatia — *no pa suplantá hende*, pero pa **reflehá nos kultura, nos pensa, nos humanidad.**
 
-Tone: warm, Caribbean, concise, culturally-aware
+📌 Pillars:
+- **AI étiko ku rasonamentu profundo**
+- **Ekonomia pa kreatornan (ReflexCoin)**
+- **Marketplace kreativo**
+- **Cultural Intelligence pa Papiamentu i Caribe**
 
-Behavior rules:
+---
 
-pensa lentamente (slow reasoning)
+# 🧩 **Komponentenan di e Ekosistema**
+| Layer | Deskripshon | Impacto |
+|-------|-------------|---------|
+| 🧠 **Reflexhon Core** | Reasoning + Creative + Empathic Layers | Human-centered AI |
+| 💠 **ReflexCoin** | Token pa kontribushon | Ekonomia étiko |
+| 🎨 **ReflexMarket** | Marketplace pa prompts/assets | Income pa kreatornan |
+| 💎 **Treasury DAO** | Gobernashon | Finansia AI étiko |
 
-invitá klaridat
+---
 
-kontrolá empatia
+# 🪞 **Círculo di Valor**
+`Creators → AI Core → Marketplace → Treasury DAO → ReflexCoin → Creators`
 
-reflehá despues di keda kla un output
+Genera:
+- 💰 Valor ekonomiko  
+- 🧠 Valor edukativo  
+- 💫 Valor humano  
 
-2. 🔁 Reflexhon Reflection Loop
+---
 
-Sistema di AI ku ta pensa → responde → refleja → refina.
-Cada output pasa 3 fase:
+# 🔥 **Reflexhon Methodology — Human-Centered AI**
+Reflexhon ta basa riba 3 método fundamental:
 
-Initial reasoning
+## 1️⃣ Persona Layer  
+AI ku identidad konsistente:
+- clarity  
+- empathy  
+- slow thinking  
+- cultural awareness (Caribbean)  
+- respectful communication  
 
-Self-reflection (AI ta evaluá su claridat, empatia, utilidad)
+## 2️⃣ Reflexhon Reflection Loop  
+AI ta analiza su propio output:
 
-Refined response
+1. Initial reasoning  
+2. Self-reflection  
+3. Improve clarity + empathy  
+4. Final output  
 
-Esaki ta sigui metodologia moderno pa AI étiko:
+## 3️⃣ Grounded Reasoning Layer  
+AI ku:
+- struktura  
+- fact-check  
+- reasoning transparante  
+- kulturel konteksto  
 
-“Personal AI + self-reflective agents + sense-making.”
+---
 
-3. 📡 Grounded Reasoning Layer
+# 🧠 **Arkitektura & Teknologia**
+- **Frontend:** Next.js + Tailwind  
+- **Backend:** Node/Nest + Prisma  
+- **AI Stack:** Gemini 2.0 + Reflexhon Analyzer  
+- **Storage:** IPFS + R2  
+- **Ethics Guard:** bias audit + privacy  
 
-Reflexhon ta uza fact grounding (Google/Gemini style):
+---
 
-verificashon di information
+# 🚀 **Reflexhon Studio (Live Apps)**
+| Module | Status | Link |
+|--------|--------|-------|
+| 🤖 Reflexhon Chat | ✔ 100% | https://huggingface.co/spaces/reflexhon-global/reflexhon-studio |
+| 🎨 Reflexhon Image Generator | ✔ | same link |
+| 🎬 Reflexhon VEO Animate | ✔ | same link |
+| 🔍 Analyzer (Reasoning Layer) | ✔ | same link |
 
-strong analyzer
-
-struktura ku clarity
-
-cultural adaptation
+Repo pa Studio:
