@@ -81,9 +81,9 @@ AI ku:
 
 ---
 
-# 🚀 **Reflexhon Studio (Live Apps)**
+🚀 Reflexhon Studio (Live Apps)
 
-**🔗 Reflexhon Studio Live:**  
+🔗 **Reflexhon Studio Live:**  
 https://huggingface.co/spaces/reflexhon-global/reflexhon-studio
 
 Module | Status | Link
@@ -92,6 +92,10 @@ Module | Status | Link
 🎨 Image Generator | ✔ | same link
 🎬 Animate Image (VEO) | ✔ | same link
 🔍 Analyzer (Reasoning Layer) | ✔ | same link
+
+📁 Repo pa Reflexhon Studio (HF):  
+/hingingface/spaces/reflexhon-studio
+
 
 
 
