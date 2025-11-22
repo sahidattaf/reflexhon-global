@@ -89,4 +89,4 @@ AI ku:
 | 🎬 Reflexhon VEO Animate | ✔ | same link |
 | 🔍 Analyzer (Reasoning Layer) | ✔ | same link |
 
-Repo pa Studio:
+Repo pa Studio: 
