@@ -82,12 +82,18 @@ AI ku:
 ---
 
 # 🚀 **Reflexhon Studio (Live Apps)**
-| Module | Status | Link |
-|--------|--------|-------|
-| 🤖 Reflexhon Chat | ✔ 100% | https://huggingface.co/spaces/reflexhon-global/reflexhon-studio |
-| 🎨 Reflexhon Image Generator | ✔ | same link |
-| 🎬 Reflexhon VEO Animate | ✔ | same link |
-| 🔍 Analyzer (Reasoning Layer) | ✔ | same link |
+
+**🔗 Reflexhon Studio Live:**  
+https://huggingface.co/spaces/reflexhon-global/reflexhon-studio
+
+Module | Status | Link
+--- | --- | ---
+🤖 Reflexhon Chat | ✔ 100% | same link
+🎨 Image Generator | ✔ | same link
+🎬 Animate Image (VEO) | ✔ | same link
+🔍 Analyzer (Reasoning Layer) | ✔ | same link
+
+
 
 Repo pa Studio:
 ```
