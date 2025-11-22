@@ -1,204 +1,195 @@
 <div align="center">
-  <img src="reflexhon_logo_dark.svg" height="120"/>
 
-# 🌍 **Reflexhon Global 2027**
-### *Human-Centered Intelligence Ecosystem*
+<img src="reflexhon_logo_dark.svg" width="220"/>
+
+<br><br>
 
 [![Status: In Development](https://img.shields.io/badge/Status-In%20Development-FFC772?style=for-the-badge&logo=github)]()
 [![Version](https://img.shields.io/badge/Version-0.9.0-3CCAC6?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-315DFF?style=for-the-badge)]()
-[![AI Core](https://img.shields.io/badge/AI_Core-Active-3CCAC6?style=for-the-badge&logo=openaigym)]()
-[![ReflexCoin](https://img.shields.io/badge/ReflexCoin-Ethical_Economy-FFC772?style=for-the-badge)]()
+[![HuggingFace Space](https://img.shields.io/badge/Reflexhon_Studio-Live-FFD93D?style=for-the-badge&logo=huggingface)](https://huggingface.co/spaces/reflexhon-global/reflexhon-studio)
+
+<br>
+
+**Reflexhon Global — Human-Centered Intelligence Ecosystem**  
+*Built for Creativity, Empathy & Cultural Intelligence.*
+
 </div>
 
 ---
 
-# 🌞 **Visión**
-Reflexhon Global ta un ekosistema di AI ku ta amplifiká humanidad, kreatividat i empatia — *no pa suplantá hende*, pero pa **reflehá nos kultura, nos pensa, nos humanity.**
-
-📌 Pillars:
-- **AI étiko ku rasonamentu profundo**
-- **Ekonomia pa kreatornan (ReflexCoin)**
-- **Marketplace kreativo**
-- **Cultural Intelligence pa Papiamentu i Caribe**
+# 📘 Table of Contents
+- [🌞 Vision](#-vision)
+- [🧩 Ecosystem Components](#-ecosystem-components)
+- [🔥 Reflexhon Methodology](#-reflexhon-methodology)
+- [🧠 Architecture](#-architecture)
+- [🚀 Reflexhon Studio (Live Apps)](#-reflexhon-studio-live-apps)
+- [📦 AI Model Hub](#-ai-model-hub)
+- [📚 Datasets](#-datasets)
+- [🗂️ Documentation Hub](#️-documentation-hub)
+- [🛠️ Roadmap](#️-roadmap)
+- [🌱 Social Impact](#-social-impact)
+- [🤝 Community & Contribution](#-community--contribution)
+- [🪙 Funding](#-funding)
 
 ---
 
-# 🧩 **Komponentenan di e Ekosistema**
+# 🌞 Vision
+Reflexhon Global ta un ekosistema di AI ku ta amplifiká humanidad, kreatividat i empatia —  
+**no pa suplantá hende, pero pa reflehá nos kultura, nos pensa, nos humanidad.**
+
+Pillars:
+- AI étiko ku rasonamentu profundo  
+- Ekonomia pa kreatornan (ReflexCoin)  
+- Marketplace kreativo  
+- Cultural Intelligence pa Papiamentu i Caribe  
+
+---
+
+# 🧩 Ecosystem Components
+
 | Layer | Deskripshon | Impacto |
 |-------|-------------|---------|
-| 🧠 **Reflexhon Core** | Reasoning + Creative + Empathic Layers | Human-centered AI |
-| 💠 **ReflexCoin** | Token pa kontribushon | Ekonomia étiko |
-| 🎨 **ReflexMarket** | Marketplace pa prompts/assets | Income pa kreatornan |
-| 💎 **Treasury DAO** | Gobernashon | Finansia AI étiko |
+| 🧠 Reflexhon Core | Reasoning + Creative + Empathic layers | Human-centered AI |
+| 💠 ReflexCoin | Token pa kontribushon | Ekonomia étiko |
+| 🎨 ReflexMarket | Marketplace pa prompts/assets | Income pa kreatornan |
+| 💎 Treasury DAO | Gobernashon | Sustainabilidad |
+
+**Cycle di Valor:**  
+Creators → AI Core → Marketplace → Treasury DAO → ReflexCoin → Creators
 
 ---
 
-# 🪞 **Círculo di Valor**
-`Creators → AI Core → Marketplace → Treasury DAO → ReflexCoin → Creators`
+# 🔥 Reflexhon Methodology
+Reflexhon ta basa riba 3 metodología:
 
-Genera:
-- 💰 Valor ekonomiko  
-- 🧠 Valor edukativo  
-- 💫 Valor humano  
-
----
-
-# 🔥 **Reflexhon Methodology — Human-Centered AI**
-Reflexhon ta basa riba 3 método fundamental:
-
-## 1️⃣ Persona Layer  
+### **1️⃣ Persona Layer**
 AI ku identidad konsistente:
 - clarity  
 - empathy  
 - slow thinking  
-- cultural awareness (Caribbean)  
-- respectful communication
+- cultural awareness  
+- respectful communication  
 
-## 2️⃣ Reflexhon Reflection Loop  
+### **2️⃣ Reflexhon Reflection Loop**
 AI ta analiza su propio output:
-
 1. Initial reasoning  
 2. Self-reflection  
-3. Improve clarity + empathy  
-4. Final output
+3. Improvement  
+4. Final answer  
 
-## 3️⃣ Grounded Reasoning Layer  
-AI ku:
-- struktura
-- fact-check
-- reasoning transparante
-- kulturel konteksto
-
----
-
-# 🧠 **Arkitektura & Teknologia**
-- **Frontend:** Next.js + Tailwind  
-- **Backend:** Node/Nest + Prisma  
-- **AI Stack:** Gemini 2.0 + Reflexhon Analyzer  
-- **Storage:** IPFS + R2  
-- **Ethics Guard:** bias audit + privacy  
+### **3️⃣ Grounded Reasoning Layer**
+- struktura  
+- fact-check  
+- reasoning transparante  
+- konteksto kulturel  
 
 ---
 
-🚀 Reflexhon Studio (Live Apps)
+# 🧠 Architecture
 
-🔗 **Reflexhon Studio Live:**  
-https://huggingface.co/spaces/reflexhon-global/reflexhon-studio
-
-Module | Status | Link
---- | --- | ---
-🤖 Reflexhon Chat | ✔ 100% | same link
-🎨 Image Generator | ✔ | same link
-🎬 Animate Image (VEO) | ✔ | same link
-🔍 Analyzer (Reasoning Layer) | ✔ | same link
-
-📁 Repo pa Reflexhon Studio (HF):  
-/hingingface/spaces/reflexhon-studio
-
-
-
-
-Repo pa Studio:
-```
-/huggingface/spaces/reflexhon-studio
-```
+**Tech Stack**
+- Frontend: Next.js + Tailwind  
+- Backend: Node/Nest + Prisma  
+- AI: Gemini 2.0 + Reflexhon Analyzer  
+- Storage: IPFS + Cloudflare R2  
+- Ethics Guard: Bias audit + privacy layer  
 
 ---
 
-# 📦 **AI Model Hub**
-Hincamentu pa publíkashon na HuggingFace:
+# 🚀 Reflexhon Studio (Live Apps)
 
-### Models:
-```
-reflexhon-creative
-reflexhon-empathic
-reflexhon-reasoning
-```
+| Module | Status | Link |
+|--------|--------|------|
+| 🤖 Reflexhon Chat | ✔ 100% | https://huggingface.co/spaces/reflexhon-global/reflexhon-studio |
+| 🎨 Image Generator | ✔ | same link |
+| 🎬 VEO Animate | ✔ | same link |
+| 🔍 Analyzer | ✔ | same link |
 
-HF directory:
-```
-/huggingface/models
-```
+**Repo:** `/huggingface/spaces/reflexhon-studio`
 
 ---
 
-# 📚 **Datasets**
+# 📦 AI Model Hub  
+Reflexhon Models riba HuggingFace:
+
+- **reflexhon-creative**  
+- **reflexhon-empathic**  
+- **reflexhon-reasoning**  
+
+📁 Directory:
+
+---
+
+# 📚 Datasets
 Formato preferensia: `.jsonl`
 
-Dataset riba HF:
-```
-reflexhon-global/reflexhon-datasets
-```
+Dataset oficial riba HF:  
+🔗 https://huggingface.co/datasets/reflexhon-global/reflexhon-datasets
 
 Project directory:
-```
-/ai/datasets
-/huggingface/datasets
-```
 
 ---
 
-# 🗂️ **Dokumentashon Kompletu**
-## 📘 Docs Hub  
-```
-/docs
-  /guides
-  /integration
-  /philosophy
-```
+# 🗂️ Documentation Hub
 
-## Links:
-- **Local Setup:** /docs/guides/reflexhon_workspace.md  
-- **Slack Guide:** /docs/guides/reflexhon_slack_guide.md  
-- **Google AI Integration:** /docs/integration/Reflexhon_GoogleAI_Integration.md  
-- **Methodology:** /docs/philosophy/reflexhon_methodology.md  
-- **Reflexhon Deck (HTML):** https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html  
-- **Reflexhon Embed Deck:** https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html  
+📁 `/docs`  
+- `/guides`  
+- `/integration`  
+- `/philosophy`  
+
+Important docs:
+- Workspace Setup → `/docs/guides/reflexhon_workspace.md`  
+- Slack Integration → `/docs/guides/reflexhon_slack_guide.md`  
+- Google AI → `/docs/integration/Reflexhon_GoogleAI_Integration.md`  
+- Methodology → `/docs/philosophy/reflexhon_methodology.md`  
+
+🖼 Reflexhon Decks  
+- Full Deck:  
+  https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html  
+- Embed Deck:  
+  https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html  
 
 ---
 
-# 🛠️ **Roadmap**
-### **2024–2025**  
+# 🛠️ Roadmap
+### **2024–2025**
 - Reflexhon Studio MVP  
 - ReflexCoin Pilot  
 
-### **2026**  
+### **2026**
 - ReflexMarket  
 - Treasury DAO  
 
-### **2027**  
+### **2027**
 - Reflexhon Mesh AI  
-- Reflexhon Economy Global  
+- Reflexhon Global Economy  
 
 ---
 
-# 🌱 **Impacto Sosial**
-- Edukashon lokal den Papiamentu  
+# 🌱 Social Impact
+- Edukashon den Papiamentu  
 - Preservashon di kultura  
-- Green AI (low compute)  
+- Green AI → low compute  
 
 ---
 
-# 🤝 **Komunidad & Kontribushon**
-Guia:  
-`COMMUNITY.md`  
-`CONTRIBUTING.md`  
-`CODE_OF_CONDUCT.md`  
+# 🤝 Community & Contribution
+- COMMUNITY.md  
+- CONTRIBUTING.md  
+- CODE_OF_CONDUCT.md  
 
 ---
 
-# 🪙 **Funding**
-Si bo ke sostené AI étiko i edukashon lokal:
-
-👉 Become a Sponsor  
-https://github.com/sponsors/sahidattaf
+# 🪙 Funding
+**Support ethical AI & local education:**  
+👉 https://github.com/sponsors/sahidattaf  
 
 ---
 
 <div align="center">
 
-### *“Un AI ku siña pa reflehá humanity, ta un AI ku ta kreá futuro.”*  
+### **“Un AI ku siña pa reflehá humanity, ta un AI ku ta kreá futuro.”**  
 — Reflexhon Global Manifesto 🌞
 
 </div>
