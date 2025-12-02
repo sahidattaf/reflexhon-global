@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <p align="center" style="background:black; padding:20px;">
   <img src="reflexhon_logo_dark.svg" alt="Reflexhon Logo" width="180"/>
 </p>
@@ -227,3 +228,82 @@ Directories:
 
 
 
+=======
+# Reflexhon Global
+
+🌍 **Cultural Alignment Dataset & Cloud API**
+
+Reflexhon Global provides a Cloud API layer for cultural alignment processing with a focus on Papiamentu language and cultural understanding.
+
+## 🚀 Quick Start
+
+### Prerequisites
+- [Node.js v18+](https://nodejs.org/)
+- [Git](https://git-scm.com/)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/sahidattaf/reflexhon-global.git
+cd reflexhon-global
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env
+
+# Start development server
+npm run dev
+```
+
+The API will be available at `http://localhost:3000`
+
+## 📁 Project Structure
+
+```
+reflexhon-global/
+├── api/           # API endpoint definitions and versioning
+├── routes/        # Route handlers
+├── services/      # Business logic layer
+├── utils/         # Utility functions
+├── middleware/    # Express middleware
+├── config/        # Configuration files
+├── ai/            # AI models and datasets
+├── docs/          # Documentation
+└── server.js      # Application entry point
+```
+
+## 🔧 Available Commands
+
+- `npm run dev` - Start development server with auto-reload
+- `npm start` - Start production server
+- `npm test` - Run tests
+- `npm run lint` - Run linter
+
+## 📖 Documentation
+
+- [API Documentation](./docs/API.md) - API endpoints and usage
+- [Architecture Guide](./docs/ARCHITECTURE.md) - System architecture
+- [Setup Guide](./setup_reflexhon_local.md) - Detailed setup instructions
+
+## 🌐 API Endpoints
+
+- `GET /health` - Health check
+- `GET /api` - API information
+- `GET /api/v1/datasets` - Get all datasets
+- `GET /api/v1/datasets/:id` - Get dataset by ID
+- `POST /api/v1/reflexion/process` - Process reflexion
+- `POST /api/v1/reflexion/alignment` - Get cultural alignment
+
+See [API.md](./docs/API.md) for complete documentation.
+
+## 🤝 Contributing
+
+See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) and [COMMUNITY.md](./COMMUNITY.md)
+
+## 📄 License
+
+MIT License - see [LICENSE](./LICENSE)
+>>>>>>> 188f6c1 (Cleanup: Reflexhon Cloud API Layer v1 prep)
