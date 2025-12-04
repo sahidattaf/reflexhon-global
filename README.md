@@ -299,6 +299,85 @@ reflexhon-global/
 
 See [API.md](./docs/API.md) for complete documentation.
 
+## 🚀 Deployment
+
+### Local Docker Build
+
+Build the Docker image locally:
+```bash
+docker build -t reflexhon-cloud-api:latest .
+```
+
+Run the container:
+```bash
+docker run -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e ENVIRONMENT=production \
+  reflexhon-cloud-api:latest
+```
+
+Test locally:
+```bash
+curl http://localhost:3000/health
+```
+
+### Cloudflare Workers Deployment
+
+1. **Install Wrangler CLI:**
+   ```bash
+   npm install -g @cloudflare/wrangler
+   ```
+
+2. **Authenticate:**
+   ```bash
+   wrangler login
+   ```
+
+3. **Update Configuration:**
+   - Edit `wrangler.toml` with your Cloudflare credentials
+   - Replace placeholder database and KV IDs in staging/production environments
+
+4. **Deploy to Staging:**
+   ```bash
+   wrangler deploy --env staging
+   ```
+
+5. **Deploy to Production:**
+   ```bash
+   wrangler deploy --env production
+   ```
+
+### GitHub Actions CI/CD
+
+Automated deployment is configured in `.github/workflows/deploy-cloudflare.yml`
+
+**Configuration Required:**
+1. Set GitHub repository secrets:
+   - `CLOUDFLARE_API_TOKEN` - Your Cloudflare API token
+   - `CF_ACCOUNT_ID` - Your Cloudflare Account ID
+
+2. Branch Protection:
+   - **Staging**: Automatically deploys on push to `reflexhon-cloud-v1`
+   - **Production**: Automatically deploys on push to `main` (after tests pass)
+
+**Workflow Steps:**
+- Run linting and tests
+- Build and deploy to Staging (reflexhon-cloud-v1 branch)
+- Build and deploy to Production (main branch)
+
+### Environment Variables
+
+Configure environment variables in your `.env` file:
+```bash
+PORT=3000
+NODE_ENV=development
+ENVIRONMENT=development
+LOG_LEVEL=debug
+API_VERSION=v1
+```
+
+For production environments, set these in Cloudflare Dashboard or GitHub Secrets.
+
 ## 🤝 Contributing
 
 See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) and [COMMUNITY.md](./COMMUNITY.md)
