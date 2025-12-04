@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+npm-error.log
+.git
+.gitignore
+FETCH_HEAD
+.env.local
+.DS_Store
+dist
+build
+coverage
+.npm
+.eslintcache
