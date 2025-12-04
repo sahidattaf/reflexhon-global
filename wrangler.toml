@@ -1,51 +1,8 @@
 name = "reflexhon-cloud"
 main = "server.js"
 compatibility_date = "2024-12-01"
-compatibility_flags = ["nodejs_compat"]
 account_id = "9a009ef5b0a39e042797e3218c05669c"
-
 workers_dev = true
 
 [vars]
 NODE_ENV = "production"
-
-[env.development]
-vars = { ENVIRONMENT = "development", LOG_LEVEL = "debug" }
-
-[env.staging]
-vars = { 
-  ENVIRONMENT = "staging", 
-  LOG_LEVEL = "info",
-  API_URL = "https://staging-api.reflexhon.cloud"
-}
-routes = [
-  { pattern = "staging-api.reflexhon.cloud/*", zone_name = "reflexhon.cloud" }
-]
-
-[[env.staging.d1_databases]]
-binding = "DB"
-database_name = "reflexhon_staging"
-database_id = "staging_db_id_placeholder"
-
-[[env.staging.kv_namespaces]]
-binding = "CACHE"
-id = "staging_kv_id_placeholder"
-
-[env.production]
-vars = { 
-  ENVIRONMENT = "production", 
-  LOG_LEVEL = "warn",
-  API_URL = "https://api.reflexhon.cloud"
-}
-routes = [
-  { pattern = "api.reflexhon.cloud/*", zone_name = "reflexhon.cloud" }
-]
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "reflexhon_production"
-database_id = "prod_db_id_placeholder"
-
-[[env.production.kv_namespaces]]
-binding = "CACHE"
-id = "prod_kv_id_placeholder"
