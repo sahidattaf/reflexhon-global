@@ -1,10 +1,15 @@
-<<<<<<< HEAD
 <p align="center" style="background:black; padding:20px;">
   <img src="reflexhon_logo_dark.svg" alt="Reflexhon Logo" width="180"/>
 </p>
 
 <h1 align="center">🌍 Reflexhon Global 2027</h1>
 <p align="center"><i>Human-Centered Intelligence Ecosystem</i></p>
+
+<p align="center">
+  <a href="https://github.com/sahidattaf/reflexhon-global/actions">
+    <img src="https://github.com/sahidattaf/reflexhon-global/workflows/Deploy%20to%20Cloudflare%20Workers/badge.svg" alt="Deployment Status">
+  </a>
+</p>
 
 ---
 
@@ -27,10 +32,10 @@ Reflexhon Global ta un ekosistema AI ku ta amplifiká **humanidad, kreatividat i
 # 🪞 Círculo di Valor
 **Creators → AI Core → ReflexMarket → Treasury DAO → ReflexCoin → Creators**
 
-Genera:  
-- 💰 Valor ekonomiko  
-- 🧠 Valor edukativo  
-- 💫 Valor humano  
+Genera:
+- 💰 Valor ekonomiko
+- 🧠 Valor edukativo
+- 💫 Valor humano
 
 ---
 
@@ -38,351 +43,185 @@ Genera:
 
 ## 1️⃣ Persona Layer
 AI ku identidad konsistente:
-- clarity  
-- empathy  
-- slow thinking  
-- Caribbean cultural awareness  
-- respeto  
+- clarity
+- empathy
+- slow thinking
+- Caribbean cultural awareness
+- respeto
 
 ## 2️⃣ Reflexhon Reflection Loop
 AI ta:
-- analiza su rasonamentu  
-- hasi self-reflection  
-- aumenta claridad + empatia  
-- entrega un output refiná  
-
-## 3️⃣ Grounded Reasoning Layer
-AI ku:
-- struktura  
-- fact-checking  
-- transparent chain-of-thought (summarized)  
-- konteksto kultural  
+- analiza su rasonamentu
+- hasi self-reflection
+- evalua output
+- honra un *pausa* den respuesta
 
 ---
 
-# ⚡ ReflexMarket (Extended)
-### *The Soul of the Reflexhon Economy*
+# 🌎 Reflexhon Global Cloud API
 
-ReflexMarket ta un **creators-first marketplace**, ku ta duna poder bek na komunidat.
-
-## Inkluí:
-- 🎨 Prompts pa Imagen / Video generation  
-- 📦 Reflexhon Model Packs  
-- 🎥 Video Templates (VEO)  
-- 🧠 Reflection Loops pa AI Agents  
-- 🎧 Voice assets  
-- 📚 Cultural reasoning packs (Caribbean/Papiamentu logic)
-
-## 3 Nivel di Valor
-1. **Creative Assets**  
-2. **AI Model Extensions**  
-3. **Reflexhon Reflection Modules**
-
-## Model di Pagamento
-- 💛 80% bai na creator  
-- 💠 20% bai na Treasury DAO (education + community)  
-
-## ReflexMarket Vision
-> **AI ku ta honra kultura lokal i duna ingreso real na kreatornan.**
-
----
-
-# 🪙 ReflexCoin (Extended)
-### *The Ethical Token that Rewards Human Value*
-
-ReflexCoin ta un token pa:
-- kontribushon  
-- edukashon  
-- training data étiko  
-- validashon di kultura lokal  
-
-## ReflexCoin Flow
-1. Creator ta aporta asset / prompt / code  
-2. AI ta usa dje → reflexive gain  
-3. ReflexCoin ta generá pa creator  
-4. Treasury DAO ta usan pa:
-   - scholarships  
-   - AI education
-   - cultural preservation  
-
-## Token Utility
-- 🏪 Compra assets den ReflexMarket  
-- 🔐 Access premium Reflection Modes  
-- 🧠 Train Reflexhon models  
-- 🎓 Sponsor edukashon  
-- 🪞 Personal AI Refinement Packs  
-
----
-
-# 🧠 Arkitektura & Teknologia
-
-- **Frontend:** Next.js + Tailwind  
-- **Backend:** Node/Nest + Prisma  
-- **AI Mesh:** Gemini 2.0 + Reflexhon Analyzer  
-- **Storage:** IPFS + Cloudflare R2  
-- **Ethics Guard:** Bias audit + privacy monitor  
-
----
-
-# 🚀 Reflexhon Studio — LIVE
-
-| Module | Status | Link |
-|---------|---------|-------|
-| 🤖 Reflexhon Chat | ✔ | https://huggingface.co/spaces/reflexhon-global/reflexhon-studio |
-| 🎨 Image Generator | ✔ | same link |
-| 🎬 VEO Animate | ✔ | same link |
-| 🔍 Analyzer | ✔ | same link |
-
-Studio Repo:  
-`/huggingface/spaces/reflexhon-studio`
-
----
-
-# 🤗 AI Model Hub
-
-Models kla pa publiká:
-- reflexhon-creative  
-- reflexhon-empathic  
-- reflexhon-reasoning  
-
-Directory:  
-`/huggingface/models`
-
----
-
-# 📚 Datasets
-
-Dataset publiká:  
-👉 https://huggingface.co/datasets/reflexhon-global/reflexhon-datasets
-
-Formato: `.jsonl`
-
-Directories:  
-`/ai/datasets`  
-`/huggingface/datasets`
-
----
-
-# 🗂️ Dokumentashon Kompletu
-
-- `/docs/guides`  
-- `/docs/integration`  
-
-### Important Docs:
-- Local Setup: `/docs/guides/reflexhon_workspace.md`  
-- Slack Guide: `/docs/guides/reflexhon_slack_guide.md`  
-- Google AI Integration: `/docs/integration/Reflexhon_GoogleAI_Integration.md`  
-
----
-
-# 📊 Reflexhon Decks
-
-- Reflexhon Deck → https://sahidattaf.github.io/reflexhon-global/reflexhon_deck.html  
-- Reflexhon Embed Deck → https://sahidattaf.github.io/reflexhon-global/reflexhon_embed.html  
-
----
-
-# 🛠️ Roadmap
-
-### **2024–2025**
-- Reflexhon Studio MVP  
-- ReflexCoin Pilot  
-
-### **2026**
-- ReflexMarket  
-- Treasury DAO  
-
-### **2027**
-- Reflexhon Mesh AI  
-- Reflexhon Global Economy  
-
----
-
-# 🌱 Impacto Sosial
-- Edukashon Papiamentu  
-- Preservashon di kultura  
-- Green AI (low compute)  
-
----
-
-# 🤝 Komunidad
-- COMMUNITY.md  
-- CONTRIBUTING.md  
-- CODE_OF_CONDUCT.md  
-
----
-
-# 🪙 Funding
-👉 https://github.com/sponsors/sahidattaf  
-
----
-
-<div align="center">
-  
-### **“Un AI ku siña pa reflehá humanity, ta un AI ku ta kreá futuro.”**  
-🌞 *Reflexhon Global Manifesto*
-
-</div>
-
-
-
-
-
-=======
-# Reflexhon Global
-
-🌍 **Cultural Alignment Dataset & Cloud API**
-
-Reflexhon Global provides a Cloud API layer for cultural alignment processing with a focus on Papiamentu language and cultural understanding.
+This repository contains the Node.js Express API for cultural alignment training and inference.
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- [Node.js v18+](https://nodejs.org/)
-- [Git](https://git-scm.com/)
+```bash
+# Install dependencies
+npm install
 
-### Installation
+# Start development server
+npm run dev
+
+# Run tests
+npm test
+```
+
+## 📚 Documentation
+
+- **[API Documentation](docs/API.md)** - Complete API reference
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and patterns
+- **[Deployment Setup](docs/guides/DEPLOYMENT_SETUP.md)** - Production deployment guide
+- **[Cloudflare Setup](CLOUDFLARE_SETUP.md)** - Quick Cloudflare configuration
+- **[GitHub Secrets](GITHUB_SECRETS_SETUP.md)** - CI/CD configuration
+
+## 🛠️ Development
+
+### Running Locally
 
 ```bash
-# Clone the repository
-git clone https://github.com/sahidattaf/reflexhon-global.git
-cd reflexhon-global
+# Copy environment variables
+cp .env.example .env
 
 # Install dependencies
 npm install
 
-# Copy environment variables
-cp .env.example .env
-
-# Start development server
+# Start development server (with hot reload)
 npm run dev
 ```
 
-The API will be available at `http://localhost:3000`
+The API runs on `http://localhost:3000`
 
-## 📁 Project Structure
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run linter
+npm run lint
+```
+
+## ☁️ Deployment
+
+### Cloudflare Workers
+
+**Automated deployment via GitHub Actions:**
+- Push to `main` → Production deployment
+- Push to `reflexhon-cloud-v1` → Staging deployment
+
+**Manual deployment:**
+```bash
+# Deploy to staging
+wrangler deploy --env staging
+
+# Deploy to production
+wrangler deploy --env production
+```
+
+### Setup Guides
+
+1. **[Cloudflare Resources Setup](CLOUDFLARE_SETUP.md)** - Create D1 databases and KV namespaces
+2. **[GitHub Secrets Setup](GITHUB_SECRETS_SETUP.md)** - Configure automated deployments
+3. **[Deployment Guide](docs/guides/DEPLOYMENT_SETUP.md)** - Complete deployment documentation
+
+## 📖 API Endpoints
+
+### Datasets
+- `GET /api/v1/datasets` - List all cultural alignment datasets
+- `GET /api/v1/datasets/:id` - Get specific dataset entry
+
+### Reflexion
+- `POST /api/v1/reflexion/process` - Process input through reflexion loop
+- `POST /api/v1/reflexion/analyze` - Analyze reasoning patterns
+
+See [API Documentation](docs/API.md) for complete reference.
+
+## 🏗️ Architecture
 
 ```
 reflexhon-global/
-├── api/           # API endpoint definitions and versioning
-├── routes/        # Route handlers
-├── services/      # Business logic layer
-├── utils/         # Utility functions
-├── middleware/    # Express middleware
-├── config/        # Configuration files
-├── ai/            # AI models and datasets
-├── docs/          # Documentation
-└── server.js      # Application entry point
+├── api/              # API versioning and routing
+├── routes/           # Express route handlers
+├── services/         # Business logic layer
+├── middleware/       # Custom middleware
+├── utils/            # Shared utilities
+├── config/           # Configuration files
+├── ai/datasets/      # JSONL cultural alignment data
+└── docs/             # Documentation
 ```
 
-## 🔧 Available Commands
+See [Architecture Documentation](docs/ARCHITECTURE.md) for details.
 
-- `npm run dev` - Start development server with auto-reload
-- `npm start` - Start production server
-- `npm test` - Run tests
-- `npm run lint` - Run linter
+## 🌐 Technology Stack
 
-## 📖 Documentation
+- **Runtime**: Node.js 18+
+- **Framework**: Express.js
+- **Deployment**: Cloudflare Workers
+- **Database**: Cloudflare D1 (SQL)
+- **Cache**: Cloudflare KV
+- **CI/CD**: GitHub Actions
 
-- [API Documentation](./docs/API.md) - API endpoints and usage
-- [Architecture Guide](./docs/ARCHITECTURE.md) - System architecture
-- [Setup Guide](./setup_reflexhon_local.md) - Detailed setup instructions
+## 🔐 Environment Variables
 
-## 🌐 API Endpoints
-
-- `GET /health` - Health check
-- `GET /api` - API information
-- `GET /api/v1/datasets` - Get all datasets
-- `GET /api/v1/datasets/:id` - Get dataset by ID
-- `POST /api/v1/reflexion/process` - Process reflexion
-- `POST /api/v1/reflexion/alignment` - Get cultural alignment
-
-See [API.md](./docs/API.md) for complete documentation.
-
-## 🚀 Deployment
-
-### Local Docker Build
-
-Build the Docker image locally:
-```bash
-docker build -t reflexhon-cloud-api:latest .
-```
-
-Run the container:
-```bash
-docker run -p 3000:3000 \
-  -e NODE_ENV=production \
-  -e ENVIRONMENT=production \
-  reflexhon-cloud-api:latest
-```
-
-Test locally:
-```bash
-curl http://localhost:3000/health
-```
-
-### Cloudflare Workers Deployment
-
-1. **Install Wrangler CLI:**
-   ```bash
-   npm install -g @cloudflare/wrangler
-   ```
-
-2. **Authenticate:**
-   ```bash
-   wrangler login
-   ```
-
-3. **Update Configuration:**
-   - Edit `wrangler.toml` with your Cloudflare credentials
-   - Replace placeholder database and KV IDs in staging/production environments
-
-4. **Deploy to Staging:**
-   ```bash
-   wrangler deploy --env staging
-   ```
-
-5. **Deploy to Production:**
-   ```bash
-   wrangler deploy --env production
-   ```
-
-### GitHub Actions CI/CD
-
-Automated deployment is configured in `.github/workflows/deploy-cloudflare.yml`
-
-**Configuration Required:**
-1. Set GitHub repository secrets:
-   - `CLOUDFLARE_API_TOKEN` - Your Cloudflare API token
-   - `CF_ACCOUNT_ID` - Your Cloudflare Account ID
-
-2. Branch Protection:
-   - **Staging**: Automatically deploys on push to `reflexhon-cloud-v1`
-   - **Production**: Automatically deploys on push to `main` (after tests pass)
-
-**Workflow Steps:**
-- Run linting and tests
-- Build and deploy to Staging (reflexhon-cloud-v1 branch)
-- Build and deploy to Production (main branch)
-
-### Environment Variables
-
-Configure environment variables in your `.env` file:
-```bash
-PORT=3000
+```env
 NODE_ENV=development
-ENVIRONMENT=development
+PORT=3000
 LOG_LEVEL=debug
-API_VERSION=v1
 ```
 
-For production environments, set these in Cloudflare Dashboard or GitHub Secrets.
+See `.env.example` for complete configuration.
+
+## 📦 Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with hot reload |
+| `npm start` | Start production server |
+| `npm test` | Run Jest tests |
+| `npm run lint` | Run ESLint |
 
 ## 🤝 Contributing
 
-See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) and [COMMUNITY.md](./COMMUNITY.md)
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+See [CLAUDE.md](CLAUDE.md) for development guidelines.
+
+## 📊 Project Status
+
+- ✅ Core API implemented
+- ✅ Cultural alignment dataset integration
+- ✅ Cloudflare Workers deployment configured
+- ✅ CI/CD pipeline set up
+- ✅ Comprehensive documentation
+- ⏳ D1 database integration (optional)
+- ⏳ KV caching layer (optional)
 
 ## 📄 License
 
 MIT License - see [LICENSE](./LICENSE)
->>>>>>> 188f6c1 (Cleanup: Reflexhon Cloud API Layer v1 prep)
+
+## 🔗 Links
+
+- **Live API**: https://reflexhon-cloud.workers.dev
+- **GitHub Actions**: https://github.com/sahidattaf/reflexhon-global/actions
+- **Cloudflare Dashboard**: https://dash.cloudflare.com
+- **Documentation**: [docs/](docs/)
+
+---
+
+<p align="center">
+  <b>Built with ❤️ for cultural AI alignment</b>
+</p>
