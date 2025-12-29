@@ -1,8 +1,2 @@
-name = "reflexhon-cloud"
-main = "server.js"
-compatibility_date = "2024-12-01"
-account_id = "9a009ef5b0a39e042797e3218c05669c"
-workers_dev = true
-
-[vars]
-NODE_ENV = "production"
+# wrangler.toml
+name = 'reflexhon-global'
