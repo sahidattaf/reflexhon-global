@@ -1,6 +1,6 @@
 import { HTTP_STATUS } from '../config/constants.js';
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   console.error('Error:', err);
 
   const statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
