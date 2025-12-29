@@ -30,11 +30,9 @@ jobs:
 
       - name: Run linter
         run: npm run lint
-        continue-on-error: true
 
       - name: Run tests
         run: npm test
-        continue-on-error: true
 
   deploy-staging:
     if: github.ref == 'refs/heads/reflexhon-cloud-v1'

@@ -1,8 +1,62 @@
 name = "reflexhon-cloud"
 main = "server.js"
 compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
 account_id = "9a009ef5b0a39e042797e3218c05669c"
+
 workers_dev = true
 
 [vars]
 NODE_ENV = "production"
+
+# Development environment configuration
+[env.development]
+vars = { ENVIRONMENT = "development", LOG_LEVEL = "debug" }
+
+# Staging environment configuration
+[env.staging]
+vars = {
+  ENVIRONMENT = "staging",
+  LOG_LEVEL = "info",
+  API_URL = "https://staging-api.reflexhon.cloud"
+}
+routes = [
+  { pattern = "staging-api.reflexhon.cloud/*", zone_name = "reflexhon.cloud" }
+]
+
+# TODO: Replace with actual D1 database ID from Cloudflare dashboard
+# Create with: wrangler d1 create reflexhon_staging
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "reflexhon_staging"
+database_id = "REPLACE_WITH_STAGING_DB_ID"
+
+# TODO: Replace with actual KV namespace ID from Cloudflare dashboard
+# Create with: wrangler kv:namespace create "CACHE" --env staging
+[[env.staging.kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_STAGING_KV_ID"
+
+# Production environment configuration
+[env.production]
+vars = {
+  ENVIRONMENT = "production",
+  LOG_LEVEL = "warn",
+  API_URL = "https://api.reflexhon.cloud"
+}
+routes = [
+  { pattern = "api.reflexhon.cloud/*", zone_name = "reflexhon.cloud" }
+]
+
+# TODO: Replace with actual D1 database ID from Cloudflare dashboard
+# Create with: wrangler d1 create reflexhon_production
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "reflexhon_production"
+database_id = "REPLACE_WITH_PRODUCTION_DB_ID"
+
+# TODO: Replace with actual KV namespace ID from Cloudflare dashboard
+# Create with: wrangler kv:namespace create "CACHE" --env production
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_WITH_PRODUCTION_KV_ID"
