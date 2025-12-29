@@ -26,16 +26,18 @@ routes = [
 
 # TODO: Replace with actual D1 database ID from Cloudflare dashboard
 # Create with: wrangler d1 create reflexhon_staging
-[[env.staging.d1_databases]]
-binding = "DB"
-database_name = "reflexhon_staging"
-database_id = "REPLACE_WITH_STAGING_DB_ID"
+# TEMPORARILY COMMENTED OUT - Add real IDs before uncommenting
+# [[env.staging.d1_databases]]
+# binding = "DB"
+# database_name = "reflexhon_staging"
+# database_id = "REPLACE_WITH_STAGING_DB_ID"
 
 # TODO: Replace with actual KV namespace ID from Cloudflare dashboard
 # Create with: wrangler kv:namespace create "CACHE" --env staging
-[[env.staging.kv_namespaces]]
-binding = "CACHE"
-id = "REPLACE_WITH_STAGING_KV_ID"
+# TEMPORARILY COMMENTED OUT - Add real IDs before uncommenting
+# [[env.staging.kv_namespaces]]
+# binding = "CACHE"
+# id = "REPLACE_WITH_STAGING_KV_ID"
 
 # Production environment configuration
 [env.production]
@@ -50,13 +52,15 @@ routes = [
 
 # TODO: Replace with actual D1 database ID from Cloudflare dashboard
 # Create with: wrangler d1 create reflexhon_production
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "reflexhon_production"
-database_id = "REPLACE_WITH_PRODUCTION_DB_ID"
+# TEMPORARILY COMMENTED OUT - Add real IDs before uncommenting
+# [[env.production.d1_databases]]
+# binding = "DB"
+# database_name = "reflexhon_production"
+# database_id = "REPLACE_WITH_PRODUCTION_DB_ID"
 
 # TODO: Replace with actual KV namespace ID from Cloudflare dashboard
 # Create with: wrangler kv:namespace create "CACHE" --env production
-[[env.production.kv_namespaces]]
-binding = "CACHE"
-id = "REPLACE_WITH_PRODUCTION_KV_ID"
+# TEMPORARILY COMMENTED OUT - Add real IDs before uncommenting
+# [[env.production.kv_namespaces]]
+# binding = "CACHE"
+# id = "REPLACE_WITH_PRODUCTION_KV_ID"
