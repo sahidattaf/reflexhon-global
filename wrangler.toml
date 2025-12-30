@@ -1,5 +1,5 @@
 name = "reflexhon-cloud"
-main = "server.js"
+main = "worker.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 account_id = "9a009ef5b0a39e042797e3218c05669c"
