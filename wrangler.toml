@@ -41,6 +41,7 @@ zone_name = "reflexhon.cloud"
 
 # Production environment configuration
 [env.production.vars]
+NODE_ENV = "production"
 ENVIRONMENT = "production"
 LOG_LEVEL = "warn"
 API_URL = "https://api.reflexhon.cloud"
