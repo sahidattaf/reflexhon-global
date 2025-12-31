@@ -8,6 +8,13 @@ workers_dev = true
 
 [vars]
 NODE_ENV = "production"
+# HuggingFace model name (HF_TOKEN is a secret, set via dashboard or wrangler secret put)
+HF_MODEL = "reflexhon-global/reflexhon-models"
+
+# IMPORTANT: Set HF_TOKEN as a secret (not in vars for security):
+# Option 1 (via wrangler CLI): wrangler secret put HF_TOKEN
+# Option 2 (via dashboard): Cloudflare Dashboard > Workers > reflexhon-cloud > Settings > Variables > Add secret
+# Get your token from: https://huggingface.co/settings/tokens
 
 # Development environment configuration
 [env.development.vars]

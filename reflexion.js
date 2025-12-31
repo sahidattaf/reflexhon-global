@@ -1,14 +1,20 @@
 // Reflexion Engine - Cultural AI Alignment Processing
+import { callHuggingFaceInference } from './huggingface.js';
 
 /**
- * Process input through the Reflexion loop
+ * Process input through the Reflexion loop with optional AI inference
  * Steps:
  * 1. Analyze reasoning
  * 2. Self-reflection
  * 3. Evaluate output
  * 4. Honor pause (cultural context)
+ * 5. Optional: AI-powered generation via HuggingFace
+ *
+ * @param {string} input - The input text to process
+ * @param {object} context - Additional context (language, cultural_context, etc.)
+ * @param {object} env - Cloudflare environment (for HF_TOKEN)
  */
-export function processReflexion(input, context = {}) {
+export async function processReflexion(input, context = {}, env = {}) {
   const startTime = Date.now();
 
   // Step 1: Analyze reasoning
@@ -21,7 +27,29 @@ export function processReflexion(input, context = {}) {
   const evaluation = evaluateQuality(reflection);
 
   // Step 4: Honor pause - cultural context matters
-  const response = addCulturalPause(evaluation);
+  let response = addCulturalPause(evaluation);
+
+  // Step 5: Optional AI-powered generation via HuggingFace
+  let aiGenerated = null;
+  if (env.HF_TOKEN && env.HF_MODEL) {
+    // Build culturally-aware prompt
+    const prompt = buildCulturalPrompt(input, context, reflection);
+
+    const aiResult = await callHuggingFaceInference(
+      env.HF_MODEL,
+      prompt,
+      env.HF_TOKEN
+    );
+
+    if (aiResult.success) {
+      aiGenerated = aiResult.output;
+      response = {
+        ...response,
+        output: aiResult.output,
+        ai_powered: true
+      };
+    }
+  }
 
   const processingTime = Date.now() - startTime;
 
@@ -33,14 +61,41 @@ export function processReflexion(input, context = {}) {
       analysis: analysis.insights,
       reflection: reflection.thoughts,
       evaluation: evaluation.score,
-      cultural_pause: response.pause_markers
+      cultural_pause: response.pause_markers,
+      ai_enhanced: aiGenerated ? true : false
     },
     metadata: {
       processing_time_ms: processingTime,
       language: context.language || 'papiamentu',
-      cultural_context: context.cultural_context || 'caribbean'
+      cultural_context: context.cultural_context || 'caribbean',
+      model: env.HF_MODEL || 'none',
+      source: aiGenerated ? 'huggingface_ai' : 'rule_based'
     }
   };
+}
+
+/**
+ * Build a culturally-aware prompt for AI generation
+ */
+function buildCulturalPrompt(input, context, reflection) {
+  const culturalContext = context.cultural_context || 'Caribbean';
+  const language = context.language || 'Papiamentu';
+
+  let prompt = `You are a culturally-aware AI assistant focused on ${culturalContext} culture and ${language} language.\n\n`;
+
+  // Add reflection insights
+  if (reflection.thoughts.length > 0) {
+    prompt += `Important considerations:\n`;
+    reflection.thoughts.forEach(thought => {
+      prompt += `- ${thought}\n`;
+    });
+    prompt += `\n`;
+  }
+
+  prompt += `Question: ${input}\n\n`;
+  prompt += `Provide a thoughtful, culturally-appropriate response that honors the context and shows empathy:\n`;
+
+  return prompt;
 }
 
 /**

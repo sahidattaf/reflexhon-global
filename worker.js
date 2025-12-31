@@ -31,10 +31,12 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.1.0',
+            version: '1.2.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
+              huggingface_datasets: env.HF_TOKEN ? 'enabled' : 'disabled',
+              huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
               database: 'coming_soon'
             }
           }),
@@ -48,8 +50,8 @@ export default {
           JSON.stringify({
             success: true,
             name: 'Reflexhon Global API',
-            version: '1.1.0',
-            description: 'Cultural Alignment API for Papiamentu',
+            version: '1.2.0',
+            description: 'Cultural Alignment API for Papiamentu - Powered by HuggingFace',
             endpoints: {
               health: {
                 path: '/health',
@@ -101,9 +103,9 @@ export default {
 
       // ===== DATASET ENDPOINTS =====
 
-      // List all datasets
+      // List all datasets (async - tries HuggingFace first)
       if (path === '/api/v1/datasets' || path === '/api/v1/datasets/') {
-        const result = getAllDatasets();
+        const result = await getAllDatasets(env);
         return new Response(
           JSON.stringify(result),
           { headers: corsHeaders, status: 200 }
@@ -168,7 +170,8 @@ export default {
           );
         }
 
-        const result = processReflexion(body.input, body.context || {});
+        // Process with HuggingFace AI if available
+        const result = await processReflexion(body.input, body.context || {}, env);
         return new Response(
           JSON.stringify(result),
           { headers: corsHeaders, status: 200 }
@@ -261,11 +264,12 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.1.0',
+            version: '1.2.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
               '✅ Reflexion Processing Engine',
+              '✅ HuggingFace Integration (datasets + AI models)',
               '🚧 D1 Database Integration (coming soon)',
               '🚧 Advanced Analytics (coming soon)'
             ],
