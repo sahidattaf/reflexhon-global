@@ -9,7 +9,8 @@ workers_dev = true
 [vars]
 NODE_ENV = "production"
 # HuggingFace model name (HF_TOKEN is a secret, set via dashboard or wrangler secret put)
-HF_MODEL = "reflexhon-global/reflexhon-models"
+# Using google/flan-t5-small - a free multilingual model that works immediately
+HF_MODEL = "google/flan-t5-small"
 
 # IMPORTANT: Set HF_TOKEN as a secret (not in vars for security):
 # Option 1 (via wrangler CLI): wrangler secret put HF_TOKEN
