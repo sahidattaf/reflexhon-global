@@ -31,6 +31,7 @@ export async function processReflexion(input, context = {}, env = {}) {
 
   // Step 5: Optional AI-powered generation via HuggingFace
   let aiGenerated = null;
+  let aiError = null;
   if (env.HF_TOKEN && env.HF_MODEL) {
     // Build culturally-aware prompt
     const prompt = buildCulturalPrompt(input, context, reflection);
@@ -48,6 +49,9 @@ export async function processReflexion(input, context = {}, env = {}) {
         output: aiResult.output,
         ai_powered: true
       };
+    } else {
+      // Capture error for debugging
+      aiError = aiResult.error || 'Unknown error';
     }
   }
 
@@ -69,7 +73,8 @@ export async function processReflexion(input, context = {}, env = {}) {
       language: context.language || 'papiamentu',
       cultural_context: context.cultural_context || 'caribbean',
       model: env.HF_MODEL || 'none',
-      source: aiGenerated ? 'huggingface_ai' : 'rule_based'
+      source: aiGenerated ? 'huggingface_ai' : 'rule_based',
+      ai_error: aiError || undefined  // Show error if AI failed
     }
   };
 }
