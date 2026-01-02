@@ -28,6 +28,7 @@ const FALLBACK_DATASETS = [
 ];
 
 // Cache for HuggingFace datasets (in-memory, resets on Worker restart)
+// Cache cleared on deployment to pick up latest HuggingFace data
 let CACHED_DATASETS = null;
 let CACHE_TIMESTAMP = null;
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
