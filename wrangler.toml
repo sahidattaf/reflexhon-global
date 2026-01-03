@@ -6,6 +6,10 @@ account_id = "9a009ef5b0a39e042797e3218c05669c"
 
 workers_dev = true
 
+# Cloudflare AI binding (free tier: 10,000 requests/day)
+[ai]
+binding = "AI"
+
 [vars]
 NODE_ENV = "production"
 # HuggingFace model name (HF_TOKEN is a secret, set via dashboard or wrangler secret put)

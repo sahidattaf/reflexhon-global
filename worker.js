@@ -35,6 +35,7 @@ export default {
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
+              cloudflare_ai: env.AI ? 'enabled' : 'disabled',
               huggingface_datasets: env.HF_TOKEN ? 'enabled' : 'disabled',
               huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
               database: 'coming_soon'
