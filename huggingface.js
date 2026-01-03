@@ -1,6 +1,8 @@
 // HuggingFace Integration Module
 // Connects Cloudflare Workers with HuggingFace Hub
 
+import { AIError, DatasetError, ERROR_CODES, classifyHuggingFaceError } from './utils/errors.js';
+
 /**
  * Fetch dataset from HuggingFace Hub
  * @param {string} datasetName - e.g., "reflexhon-global/reflexhon-datasets"
@@ -21,10 +23,15 @@ export async function fetchHuggingFaceDataset(datasetName, token = null) {
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      return {
-        success: false,
-        error: `Failed to fetch dataset: ${response.status} ${response.statusText}`
-      };
+      const errorCode = response.status === 404
+        ? ERROR_CODES.DATASET_NOT_FOUND
+        : ERROR_CODES.DATASET_FETCH_FAILED;
+
+      throw new DatasetError(
+        `Failed to fetch dataset: ${response.status} ${response.statusText}`,
+        errorCode,
+        { dataset: datasetName, status: response.status }
+      );
     }
 
     const text = await response.text();
@@ -42,6 +49,14 @@ export async function fetchHuggingFaceDataset(datasetName, token = null) {
       })
       .filter(item => item !== null);
 
+    if (datasets.length === 0) {
+      throw new DatasetError(
+        'Dataset is empty or invalid format',
+        ERROR_CODES.DATASET_EMPTY,
+        { dataset: datasetName }
+      );
+    }
+
     return {
       success: true,
       data: datasets,
@@ -50,10 +65,17 @@ export async function fetchHuggingFaceDataset(datasetName, token = null) {
       dataset_name: datasetName
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
+    // Re-throw if it's already a DatasetError
+    if (error instanceof DatasetError) {
+      throw error;
+    }
+
+    // Wrap unknown errors
+    throw new DatasetError(
+      error.message,
+      ERROR_CODES.DATASET_PARSE_ERROR,
+      { dataset: datasetName, originalError: error.message }
+    );
   }
 }
 
@@ -89,45 +111,49 @@ export async function callHuggingFaceInference(model, input, token) {
     });
 
     if (!response.ok) {
-      // Model might be loading
-      if (response.status === 503) {
-        const error = await response.json();
-        return {
-          success: false,
-          error: 'Model is loading, please retry in a few seconds',
-          estimated_time: error.estimated_time
-        };
+      // Try to get detailed error info
+      let errorData = null;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        // Ignore JSON parse errors
       }
 
-      return {
-        success: false,
-        error: `Inference failed: ${response.status} ${response.statusText}`
-      };
+      // Classify and throw appropriate error
+      throw classifyHuggingFaceError(
+        { status: response.status, estimated_time: errorData?.estimated_time },
+        errorData?.error || `${response.status} ${response.statusText}`
+      );
     }
 
     const result = await response.json();
 
     // Handle different response formats
+    let output;
     if (Array.isArray(result) && result.length > 0) {
-      return {
-        success: true,
-        output: result[0].generated_text || result[0].text || result[0],
-        model: model,
-        source: 'huggingface_inference'
-      };
+      output = result[0].generated_text || result[0].text || result[0];
+    } else {
+      output = result.generated_text || result;
     }
 
     return {
       success: true,
-      output: result.generated_text || result,
+      output: output,
       model: model,
       source: 'huggingface_inference'
     };
   } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
+    // Re-throw if it's already an AIError
+    if (error instanceof AIError) {
+      throw error;
+    }
+
+    // Wrap unknown errors
+    throw new AIError(
+      error.message,
+      ERROR_CODES.AI_INFERENCE_FAILED,
+      { model, originalError: error.message }
+    );
   }
 }
 
