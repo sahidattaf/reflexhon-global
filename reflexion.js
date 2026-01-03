@@ -1,5 +1,6 @@
 // Reflexion Engine - Cultural AI Alignment Processing
 import { callHuggingFaceInference } from './huggingface.js';
+import { AIError } from './utils/errors.js';
 
 /**
  * Process input through the Reflexion loop with optional AI inference
@@ -33,25 +34,39 @@ export async function processReflexion(input, context = {}, env = {}) {
   let aiGenerated = null;
   let aiError = null;
   if (env.HF_TOKEN && env.HF_MODEL) {
-    // Build culturally-aware prompt
-    const prompt = buildCulturalPrompt(input, context, reflection);
+    try {
+      // Build culturally-aware prompt
+      const prompt = buildCulturalPrompt(input, context, reflection);
 
-    const aiResult = await callHuggingFaceInference(
-      env.HF_MODEL,
-      prompt,
-      env.HF_TOKEN
-    );
+      const aiResult = await callHuggingFaceInference(
+        env.HF_MODEL,
+        prompt,
+        env.HF_TOKEN
+      );
 
-    if (aiResult.success) {
-      aiGenerated = aiResult.output;
-      response = {
-        ...response,
-        output: aiResult.output,
-        ai_powered: true
-      };
-    } else {
-      // Capture error for debugging
-      aiError = aiResult.error || 'Unknown error';
+      if (aiResult.success) {
+        aiGenerated = aiResult.output;
+        response = {
+          ...response,
+          output: aiResult.output,
+          ai_powered: true
+        };
+      }
+    } catch (error) {
+      // Capture user-friendly error message
+      if (error instanceof AIError) {
+        aiError = {
+          message: error.message,
+          code: error.errorCode,
+          details: error.details
+        };
+      } else {
+        aiError = {
+          message: 'AI inference failed. Using fallback processing.',
+          code: 'AI_INFERENCE_FAILED'
+        };
+      }
+      // Continue with rule-based processing as fallback
     }
   }
 
@@ -74,7 +89,10 @@ export async function processReflexion(input, context = {}, env = {}) {
       cultural_context: context.cultural_context || 'caribbean',
       model: env.HF_MODEL || 'none',
       source: aiGenerated ? 'huggingface_ai' : 'rule_based',
-      ai_error: aiError || undefined  // Show error if AI failed
+      ...(aiError && {
+        ai_fallback: true,
+        ai_error: aiError
+      })
     }
   };
 }

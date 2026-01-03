@@ -1,6 +1,7 @@
 // Dataset data - imported from JSONL
 // In production, this could be loaded from D1 database or HuggingFace
 import { fetchHuggingFaceDataset } from './huggingface.js';
+import { DatasetError } from './utils/errors.js';
 
 const FALLBACK_DATASETS = [
   {
@@ -56,28 +57,38 @@ export async function getAllDatasets(env = {}) {
 
   // Try to fetch from HuggingFace if token is available
   if (env.HF_TOKEN) {
-    const hfResult = await fetchHuggingFaceDataset(
-      'reflexhon-global/reflexhon-datasets',
-      env.HF_TOKEN
-    );
+    try {
+      const hfResult = await fetchHuggingFaceDataset(
+        'reflexhon-global/reflexhon-datasets',
+        env.HF_TOKEN
+      );
 
-    if (hfResult.success && hfResult.data.length > 0) {
-      // Cache the results
-      CACHED_DATASETS = hfResult.data;
-      CACHE_TIMESTAMP = now;
+      if (hfResult.success && hfResult.data.length > 0) {
+        // Cache the results
+        CACHED_DATASETS = hfResult.data;
+        CACHE_TIMESTAMP = now;
 
-      return {
-        success: true,
-        total: hfResult.data.length,
-        data: hfResult.data,
-        metadata: {
-          language: "papiamentu",
-          purpose: "cultural_alignment",
-          last_updated: new Date().toISOString(),
-          source: "huggingface",
-          dataset_name: "reflexhon-global/reflexhon-datasets"
-        }
-      };
+        return {
+          success: true,
+          total: hfResult.data.length,
+          data: hfResult.data,
+          metadata: {
+            language: "papiamentu",
+            purpose: "cultural_alignment",
+            last_updated: new Date().toISOString(),
+            source: "huggingface",
+            dataset_name: "reflexhon-global/reflexhon-datasets"
+          }
+        };
+      }
+    } catch (error) {
+      // Log the error but gracefully fall back to local datasets
+      if (error instanceof DatasetError) {
+        console.warn('HuggingFace dataset fetch failed, using fallback:', error.message);
+      } else {
+        console.error('Unexpected error fetching HuggingFace dataset:', error);
+      }
+      // Continue to fallback datasets
     }
   }
 
