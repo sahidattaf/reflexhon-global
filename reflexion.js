@@ -8,11 +8,11 @@ import { callHuggingFaceInference } from './huggingface.js';
  * 2. Self-reflection
  * 3. Evaluate output
  * 4. Honor pause (cultural context)
- * 5. Optional: AI-powered generation via HuggingFace
+ * 5. AI-powered generation (Cloudflare AI → HuggingFace fallback)
  *
  * @param {string} input - The input text to process
  * @param {object} context - Additional context (language, cultural_context, etc.)
- * @param {object} env - Cloudflare environment (for HF_TOKEN)
+ * @param {object} env - Cloudflare environment (for AI, HF_TOKEN)
  */
 export async function processReflexion(input, context = {}, env = {}) {
   const startTime = Date.now();
@@ -56,29 +56,35 @@ export async function processReflexion(input, context = {}, env = {}) {
         };
       }
     } catch (error) {
-      aiError = `Cloudflare AI error: ${error.message}`;
+      aiError = { message: `Cloudflare AI error: ${error.message}`, code: 'CLOUDFLARE_AI_FAILED' };
     }
   }
 
   // Fallback to HuggingFace if Cloudflare AI didn't work
   if (!aiGenerated && env.HF_TOKEN && env.HF_MODEL) {
-    const prompt = buildCulturalPrompt(input, context, reflection);
+    try {
+      const prompt = buildCulturalPrompt(input, context, reflection);
 
-    const aiResult = await callHuggingFaceInference(
-      env.HF_MODEL,
-      prompt,
-      env.HF_TOKEN
-    );
+      const aiResult = await callHuggingFaceInference(
+        env.HF_MODEL,
+        prompt,
+        env.HF_TOKEN
+      );
 
-    if (aiResult.success) {
-      aiGenerated = aiResult.output;
-      response = {
-        ...response,
-        output: aiResult.output,
-        ai_powered: true
-      };
-    } else {
-      aiError = aiError ? `${aiError}; HuggingFace: ${aiResult.error}` : aiResult.error;
+      if (aiResult.success) {
+        aiGenerated = aiResult.output;
+        response = {
+          ...response,
+          output: aiResult.output,
+          ai_powered: true
+        };
+      } else {
+        const hfError = { message: aiResult.error, code: 'HUGGINGFACE_AI_FAILED' };
+        aiError = aiError ? { ...aiError, huggingface_error: hfError } : hfError;
+      }
+    } catch (error) {
+      const hfError = { message: error.message, code: 'AI_INFERENCE_FAILED' };
+      aiError = aiError ? { ...aiError, huggingface_error: hfError } : hfError;
     }
   }
 
@@ -101,7 +107,10 @@ export async function processReflexion(input, context = {}, env = {}) {
       cultural_context: context.cultural_context || 'caribbean',
       model: env.AI ? '@cf/meta/llama-2-7b-chat-int8' : (env.HF_MODEL || 'none'),
       source: aiGenerated ? (env.AI ? 'cloudflare_ai' : 'huggingface_ai') : 'rule_based',
-      ai_error: aiError || undefined  // Show error if AI failed
+      ...(aiError && {
+        ai_fallback: true,
+        ai_error: aiError
+      })
     }
   };
 }

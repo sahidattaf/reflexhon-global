@@ -1,4 +1,4 @@
-name = "reflexhon-cloud"
+name = "reflexhon-global"
 main = "worker.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
