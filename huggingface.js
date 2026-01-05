@@ -64,7 +64,8 @@ export async function fetchHuggingFaceDataset(datasetName, token = null) {
  * @param {string} token - HuggingFace API token
  */
 export async function callHuggingFaceInference(model, input, token) {
-  const url = `https://api-inference.huggingface.co/models/${model}`;
+  // Updated to new HuggingFace endpoint (router.huggingface.co)
+  const url = `https://router.huggingface.co/models/${model}`;
 
   const headers = {
     'Authorization': `Bearer ${token}`,
