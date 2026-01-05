@@ -6,11 +6,15 @@ account_id = "9a009ef5b0a39e042797e3218c05669c"
 
 workers_dev = true
 
+# Cloudflare AI binding (free tier: 10,000 requests/day)
+[ai]
+binding = "AI"
+
 [vars]
 NODE_ENV = "production"
 # HuggingFace model name (HF_TOKEN is a secret, set via dashboard or wrangler secret put)
-# Using google/flan-t5-small - a free multilingual text generation model that works immediately
-HF_MODEL = "google/flan-t5-small"
+# Using gpt2 - A proven, reliable text generation model
+HF_MODEL = "gpt2"
 
 # IMPORTANT: Set HF_TOKEN as a secret (not in vars for security):
 # Option 1 (via wrangler CLI): wrangler secret put HF_TOKEN

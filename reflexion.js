@@ -1,6 +1,5 @@
 // Reflexion Engine - Cultural AI Alignment Processing
 import { callHuggingFaceInference } from './huggingface.js';
-import { AIError } from './utils/errors.js';
 
 /**
  * Process input through the Reflexion loop with optional AI inference
@@ -9,11 +8,11 @@ import { AIError } from './utils/errors.js';
  * 2. Self-reflection
  * 3. Evaluate output
  * 4. Honor pause (cultural context)
- * 5. Optional: AI-powered generation via HuggingFace
+ * 5. AI-powered generation (Cloudflare AI → HuggingFace fallback)
  *
  * @param {string} input - The input text to process
  * @param {object} context - Additional context (language, cultural_context, etc.)
- * @param {object} env - Cloudflare environment (for HF_TOKEN)
+ * @param {object} env - Cloudflare environment (for AI, HF_TOKEN)
  */
 export async function processReflexion(input, context = {}, env = {}) {
   const startTime = Date.now();
@@ -30,12 +29,40 @@ export async function processReflexion(input, context = {}, env = {}) {
   // Step 4: Honor pause - cultural context matters
   let response = addCulturalPause(evaluation);
 
-  // Step 5: Optional AI-powered generation via HuggingFace
+  // Step 5: AI-powered generation (Try Cloudflare AI first, then HuggingFace)
   let aiGenerated = null;
   let aiError = null;
-  if (env.HF_TOKEN && env.HF_MODEL) {
+
+  // Try Cloudflare AI first (built-in, free, fast!)
+  if (env.AI) {
     try {
-      // Build culturally-aware prompt
+      const prompt = buildCulturalPrompt(input, context, reflection);
+
+      const messages = [
+        { role: 'system', content: 'You are a culturally-aware AI focused on Caribbean culture and Papiamentu language. Respond with empathy and cultural sensitivity.' },
+        { role: 'user', content: prompt }
+      ];
+
+      const cfAiResult = await env.AI.run('@cf/meta/llama-2-7b-chat-int8', {
+        messages: messages
+      });
+
+      if (cfAiResult && cfAiResult.response) {
+        aiGenerated = cfAiResult.response;
+        response = {
+          ...response,
+          output: cfAiResult.response,
+          ai_powered: true
+        };
+      }
+    } catch (error) {
+      aiError = { message: `Cloudflare AI error: ${error.message}`, code: 'CLOUDFLARE_AI_FAILED' };
+    }
+  }
+
+  // Fallback to HuggingFace if Cloudflare AI didn't work
+  if (!aiGenerated && env.HF_TOKEN && env.HF_MODEL) {
+    try {
       const prompt = buildCulturalPrompt(input, context, reflection);
 
       const aiResult = await callHuggingFaceInference(
@@ -51,22 +78,13 @@ export async function processReflexion(input, context = {}, env = {}) {
           output: aiResult.output,
           ai_powered: true
         };
+      } else {
+        const hfError = { message: aiResult.error, code: 'HUGGINGFACE_AI_FAILED' };
+        aiError = aiError ? { ...aiError, huggingface_error: hfError } : hfError;
       }
     } catch (error) {
-      // Capture user-friendly error message
-      if (error instanceof AIError) {
-        aiError = {
-          message: error.message,
-          code: error.errorCode,
-          details: error.details
-        };
-      } else {
-        aiError = {
-          message: 'AI inference failed. Using fallback processing.',
-          code: 'AI_INFERENCE_FAILED'
-        };
-      }
-      // Continue with rule-based processing as fallback
+      const hfError = { message: error.message, code: 'AI_INFERENCE_FAILED' };
+      aiError = aiError ? { ...aiError, huggingface_error: hfError } : hfError;
     }
   }
 
@@ -87,8 +105,8 @@ export async function processReflexion(input, context = {}, env = {}) {
       processing_time_ms: processingTime,
       language: context.language || 'papiamentu',
       cultural_context: context.cultural_context || 'caribbean',
-      model: env.HF_MODEL || 'none',
-      source: aiGenerated ? 'huggingface_ai' : 'rule_based',
+      model: env.AI ? '@cf/meta/llama-2-7b-chat-int8' : (env.HF_MODEL || 'none'),
+      source: aiGenerated ? (env.AI ? 'cloudflare_ai' : 'huggingface_ai') : 'rule_based',
       ...(aiError && {
         ai_fallback: true,
         ai_error: aiError
