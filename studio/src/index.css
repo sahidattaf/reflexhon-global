@@ -1,10 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-caribbean-50: #f0f9ff;
+  --color-caribbean-100: #e0f2fe;
+  --color-caribbean-200: #bae6fd;
+  --color-caribbean-300: #7dd3fc;
+  --color-caribbean-400: #38bdf8;
+  --color-caribbean-500: #0ea5e9;
+  --color-caribbean-600: #0284c7;
+  --color-caribbean-700: #0369a1;
+  --color-caribbean-800: #075985;
+  --color-caribbean-900: #0c4a6e;
+
+  --color-sunset-50: #fff7ed;
+  --color-sunset-100: #ffedd5;
+  --color-sunset-200: #fed7aa;
+  --color-sunset-300: #fdba74;
+  --color-sunset-400: #fb923c;
+  --color-sunset-500: #f97316;
+  --color-sunset-600: #ea580c;
+  --color-sunset-700: #c2410c;
+  --color-sunset-800: #9a3412;
+  --color-sunset-900: #7c2d12;
+
+  --color-island-50: #f0fdf4;
+  --color-island-100: #dcfce7;
+  --color-island-200: #bbf7d0;
+  --color-island-300: #86efac;
+  --color-island-400: #4ade80;
+  --color-island-500: #22c55e;
+  --color-island-600: #16a34a;
+  --color-island-700: #15803d;
+  --color-island-800: #166534;
+  --color-island-900: #14532d;
+}
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-caribbean-50 via-white to-island-50 min-h-screen font-papiamentu;
+    @apply bg-gradient-to-br from-caribbean-50 via-white to-island-50 min-h-screen;
   }
 }
 
