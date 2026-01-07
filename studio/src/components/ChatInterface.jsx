@@ -28,7 +28,7 @@ export default function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/reflexion`, {
+      const response = await fetch(`${API_BASE_URL}/reflexion/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,8 +41,8 @@ export default function ChatInterface() {
       if (data.success) {
         const assistantMessage = {
           role: 'assistant',
-          content: data.data.output,
-          metadata: data.data.metadata,
+          content: data.output,
+          metadata: data.metadata,
           timestamp: new Date()
         }
         setMessages(prev => [...prev, assistantMessage])
