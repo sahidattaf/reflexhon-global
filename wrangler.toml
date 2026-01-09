@@ -10,6 +10,12 @@ workers_dev = true
 [ai]
 binding = "AI"
 
+# D1 Database binding for cultural datasets and logs
+[[d1_databases]]
+binding = "DB"
+database_name = "reflexhon_global"
+database_id = "PLACEHOLDER_DB_ID"  # Will be replaced after creating database with: wrangler d1 create reflexhon_global
+
 [vars]
 NODE_ENV = "production"
 # HuggingFace model name (HF_TOKEN is a secret, set via dashboard or wrangler secret put)
