@@ -14,7 +14,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "reflexhon_global"
-database_id = "PLACEHOLDER_DB_ID"  # Will be replaced after creating database with: wrangler d1 create reflexhon_global
+database_id = "a879199e-f6f7-45bf-a8c9-08bf0e302dd6"  # Created: 2026-01-10
 
 [vars]
 NODE_ENV = "production"
