@@ -208,13 +208,14 @@ export default {
           `;
           const result = await dbService.query(sql);
 
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
           return new Response(
             JSON.stringify({
               success: true,
               data: result.results,
               total: result.results.length
             }),
-            { headers: corsHeaders, status: 200 }
+            { headers: responseHeaders, status: 200 }
           );
         } catch (error) {
           return new Response(
@@ -289,9 +290,10 @@ export default {
           result.source = 'fallback';
         }
 
+        const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
         return new Response(
           JSON.stringify(result),
-          { headers: corsHeaders, status: 200 }
+          { headers: responseHeaders, status: 200 }
         );
       }
 
