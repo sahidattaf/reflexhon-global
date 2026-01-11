@@ -149,7 +149,7 @@ export class CulturalDataService {
       let sql = `
         SELECT cd.* FROM cultural_datasets cd
         JOIN cultural_datasets_fts fts ON cd.rowid = fts.rowid
-        WHERE fts MATCH ? AND cd.is_active = 1 AND cd.deleted_at IS NULL
+        WHERE cultural_datasets_fts MATCH ? AND cd.is_active = 1 AND cd.deleted_at IS NULL
       `;
       const params = [query];
 
