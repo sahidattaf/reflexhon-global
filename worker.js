@@ -57,7 +57,7 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.3.0',
+            version: '1.4.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
@@ -89,17 +89,33 @@ export default {
                 list: {
                   path: '/api/v1/datasets',
                   method: 'GET',
-                  description: 'List all cultural alignment datasets'
+                  description: 'List all cultural alignment datasets',
+                  params: 'limit, offset, category, language'
+                },
+                categories: {
+                  path: '/api/v1/datasets/categories',
+                  method: 'GET',
+                  description: 'Get all available categories with counts'
                 },
                 get: {
                   path: '/api/v1/datasets/:id',
                   method: 'GET',
-                  description: 'Get specific dataset by ID'
+                  description: 'Get specific dataset by ID (auto-tracks usage)'
                 },
                 search: {
                   path: '/api/v1/datasets/search?q=query',
                   method: 'GET',
-                  description: 'Search datasets by content'
+                  description: 'Search datasets using FTS5 full-text search',
+                  params: 'q (required), category, limit'
+                },
+                feedback: {
+                  path: '/api/v1/datasets/:id/feedback',
+                  method: 'POST',
+                  description: 'Submit feedback for a dataset',
+                  body: {
+                    positive: 'boolean (required) - true for positive, false for negative',
+                    comment: 'string (optional) - user comment'
+                  }
                 }
               },
               reflexion: {
@@ -129,6 +145,47 @@ export default {
       }
 
       // ===== DATASET ENDPOINTS =====
+
+      // Get available categories
+      if (path === '/api/v1/datasets/categories' || path === '/api/v1/datasets/categories/') {
+        if (!dbEnabled || !culturalData) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Database is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const sql = `
+            SELECT category, COUNT(*) as count
+            FROM cultural_datasets
+            WHERE is_active = 1 AND deleted_at IS NULL
+            GROUP BY category
+            ORDER BY category
+          `;
+          const result = await dbService.query(sql);
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: result.results,
+              total: result.results.length
+            }),
+            { headers: corsHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
 
       // List all datasets (D1 if available, otherwise fallback)
       if (path === '/api/v1/datasets' || path === '/api/v1/datasets/') {
@@ -195,6 +252,75 @@ export default {
         return new Response(
           JSON.stringify(result),
           { headers: corsHeaders, status: 200 }
+        );
+      }
+
+      // Feedback endpoint for datasets
+      const feedbackMatch = path.match(/^\/api\/v1\/datasets\/([^\/]+)\/feedback\/?$/);
+      if (feedbackMatch) {
+        if (request.method !== 'POST') {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Method not allowed. Use POST.' }
+            }),
+            { headers: corsHeaders, status: 405 }
+          );
+        }
+
+        if (!dbEnabled || !culturalData) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Database is not enabled. Feedback requires D1 database.' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        const id = feedbackMatch[1];
+        const body = await request.json().catch(() => null);
+
+        if (!body || typeof body.positive !== 'boolean') {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Request body must include "positive" field (boolean)' }
+            }),
+            { headers: corsHeaders, status: 400 }
+          );
+        }
+
+        const result = await culturalData.addFeedback(id, body.positive);
+
+        // Also log feedback to cultural_feedback table if needed
+        if (result.success && dbService) {
+          try {
+            await dbService.insert('cultural_feedback', {
+              id: generateId(),
+              dataset_id: id,
+              feedback_type: body.positive ? 'positive' : 'negative',
+              user_comment: body.comment || null,
+              session_id: requestId,
+              ip_address: request.headers.get('CF-Connecting-IP') || null,
+              created_at: getCurrentTimestamp()
+            });
+          } catch (error) {
+            console.error('Failed to log feedback to cultural_feedback table:', error);
+          }
+        }
+
+        const status = result.success ? 200 : 500;
+
+        return new Response(
+          JSON.stringify({
+            success: result.success,
+            message: result.success
+              ? `${body.positive ? 'Positive' : 'Negative'} feedback recorded`
+              : 'Failed to record feedback',
+            error: result.error || null
+          }),
+          { headers: corsHeaders, status }
         );
       }
 
@@ -409,7 +535,7 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.3.0',
+            version: '1.4.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
