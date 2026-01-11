@@ -5,6 +5,7 @@ import { getAllDatasets, getDatasetById, searchDatasets } from './datasets.js';
 import { processReflexion, analyzeReasoning } from './reflexion.js';
 import { createDatabaseService, generateId, getCurrentTimestamp } from './services/db.js';
 import { createCulturalDataService } from './services/cultural-data.js';
+import { createRateLimiterService } from './services/rate-limiter.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -16,12 +17,14 @@ export default {
     // Initialize database services if D1 is available
     let dbService = null;
     let culturalData = null;
+    let rateLimiter = null;
     let dbEnabled = false;
 
     if (env.DB) {
       try {
         dbService = createDatabaseService(env.DB);
         culturalData = createCulturalDataService(dbService);
+        rateLimiter = createRateLimiterService(dbService);
         dbEnabled = true;
       } catch (error) {
         console.error('Failed to initialize database:', error);
@@ -41,7 +44,43 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Helper function to add rate limit headers
+    const addRateLimitHeaders = (headers, rateLimit) => {
+      if (rateLimit && rateLimit.success) {
+        headers['X-RateLimit-Limit'] = rateLimit.limit?.toString() || '100';
+        headers['X-RateLimit-Remaining'] = rateLimit.remaining?.toString() || '0';
+        headers['X-RateLimit-Reset'] = rateLimit.reset?.toString() || '';
+        if (rateLimit.retryAfter) {
+          headers['Retry-After'] = rateLimit.retryAfter.toString();
+        }
+      }
+      return headers;
+    };
+
     try {
+      // Rate limiting (skip for health check and API info)
+      let rateLimitResult = null;
+      if (rateLimiter && path !== '/health' && path !== '/health/' && path !== '/api' && path !== '/api/' && path !== '/' && path !== '') {
+        const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+        rateLimitResult = await rateLimiter.checkRateLimit(clientIp, path);
+
+        if (!rateLimitResult.allowed) {
+          const rateLimitHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: {
+                message: 'Too Many Requests',
+                code: 'RATE_LIMIT_EXCEEDED',
+                limit: rateLimitResult.limit,
+                retryAfter: rateLimitResult.retryAfter
+              }
+            }),
+            { headers: rateLimitHeaders, status: 429 }
+          );
+        }
+      }
+
       // Health check endpoint
       if (path === '/health' || path === '/health/') {
         // Test database connection if available
@@ -57,14 +96,15 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.4.0',
+            version: '1.5.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
               cloudflare_ai: env.AI ? 'enabled' : 'disabled',
               huggingface_datasets: env.HF_TOKEN ? 'enabled' : 'disabled',
               huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
-              database: dbHealth
+              database: dbHealth,
+              rate_limiting: rateLimiter ? 'enabled' : 'disabled'
             }
           }),
           { headers: corsHeaders, status: 200 }
@@ -528,6 +568,37 @@ export default {
         }
       }
 
+      // Rate limit stats endpoint
+      if (path === '/api/v1/admin/rate-limits' || path === '/api/v1/admin/rate-limits/') {
+        if (!dbEnabled || !rateLimiter) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Rate limiting is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const clientIp = url.searchParams.get('ip') || null;
+          const stats = await rateLimiter.getStats(clientIp);
+
+          return new Response(
+            JSON.stringify(stats),
+            { headers: corsHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
       // Root endpoint
       if (path === '/' || path === '') {
         return new Response(
@@ -535,21 +606,23 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.4.0',
+            version: '1.5.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
               '✅ Reflexion Processing Engine',
               '✅ HuggingFace Integration (datasets + AI models)',
               dbEnabled ? '✅ D1 Database Integration' : '🚧 D1 Database Integration (pending setup)',
-              '✅ API Analytics & Logging'
+              '✅ API Analytics & Logging',
+              rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)'
             ],
             quick_start: {
               health: '/health',
               api_docs: '/api',
               datasets: '/api/v1/datasets',
               reflexion: '/api/v1/reflexion',
-              stats: '/api/v1/admin/stats'
+              stats: '/api/v1/admin/stats',
+              rate_limits: '/api/v1/admin/rate-limits'
             },
             documentation: 'https://github.com/sahidattaf/reflexhon-global'
           }),
