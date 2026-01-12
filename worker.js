@@ -117,7 +117,7 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.7.0',
+            version: '2.0.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
@@ -995,7 +995,7 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.7.0',
+            version: '2.0.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',

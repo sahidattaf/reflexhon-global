@@ -1,171 +1,119 @@
 # Reflexhon Global API Documentation
 
+**Version:** 2.0.0
+**Status:** Production
+**Base URL:** `https://reflexhon-global.sahidattaf.workers.dev`
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Rate Limiting](#rate-limiting)
+- [Caching](#caching)
+- [Endpoints](#endpoints)
+- [Response Format](#response-format)
+- [Error Handling](#error-handling)
+
+---
+
 ## Overview
 
-The Reflexhon Global Cloud API provides endpoints for cultural alignment processing and dataset management.
+Reflexhon Global is a Cultural AI Alignment API for Papiamentu language and Caribbean cultural contexts.
 
-**Base URL**: `http://localhost:3000/api/v1`
+**Features:**
+- 🗂️ Cultural Datasets - 70+ Papiamentu cultural expressions
+- 🧠 Reflexion Processing - AI-powered cultural alignment
+- 📊 Analytics Dashboard - Real-time usage insights
+- 🎯 Smart Recommendations - Hybrid AI recommendations
+- ⚡ Edge Caching - Sub-100ms global CDN responses
+- 🛡️ Rate Limiting - Intelligent traffic protection
 
-## Authentication
-
-Currently, the API is open for development. Authentication will be added in future versions.
-
-## Endpoints
-
-### Health Check
-
-#### GET `/health`
-Check API health status.
-
-**Response**:
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-11-30T00:00:00.000Z"
-}
-```
-
-### API Info
-
-#### GET `/api`
-Get API information and available endpoints.
-
-**Response**:
-```json
-{
-  "name": "Reflexhon Global API",
-  "version": "v1",
-  "status": "active",
-  "endpoints": {
-    "datasets": "/api/v1/datasets",
-    "reflexion": "/api/v1/reflexion"
-  }
-}
-```
-
-### Datasets
-
-#### GET `/api/v1/datasets`
-Retrieve all dataset entries.
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Dataset retrieved successfully",
-  "data": [
-    {
-      "id": "papiamentu_001",
-      "input": "Kiko ta empatia?",
-      "output": "Empatia ta compronde e otro hende."
-    }
-  ]
-}
-```
-
-#### GET `/api/v1/datasets/:id`
-Retrieve a specific dataset entry by ID.
-
-**Parameters**:
-- `id` (string): Dataset entry ID
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Data retrieved successfully",
-  "data": {
-    "id": "papiamentu_001",
-    "input": "Kiko ta empatia?",
-    "output": "Empatia ta compronde e otro hende."
-  }
-}
-```
-
-#### GET `/api/v1/datasets/search?q=query`
-Search dataset entries.
-
-**Query Parameters**:
-- `q` (string, required): Search query
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Search completed successfully",
-  "data": [...]
-}
-```
-
-### Reflexion
-
-#### POST `/api/v1/reflexion/process`
-Process a reflexion input.
-
-**Request Body**:
-```json
-{
-  "input": "Your reflexion input"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Reflexion processed successfully",
-  "data": {
-    "input": "Your reflexion input",
-    "processed": true,
-    "timestamp": "2025-11-30T00:00:00.000Z"
-  }
-}
-```
-
-#### POST `/api/v1/reflexion/alignment`
-Get cultural alignment for text.
-
-**Request Body**:
-```json
-{
-  "text": "Text to analyze"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Cultural alignment retrieved successfully",
-  "data": {
-    "text": "Text to analyze",
-    "alignment": "papiamentu",
-    "confidence": 0.95
-  }
-}
-```
-
-## Error Responses
-
-All errors follow this format:
-
-```json
-{
-  "success": false,
-  "error": {
-    "message": "Error description"
-  }
-}
-```
-
-### HTTP Status Codes
-
-- `200 OK`: Request successful
-- `201 Created`: Resource created successfully
-- `400 Bad Request`: Invalid request parameters
-- `404 Not Found`: Resource not found
-- `500 Internal Server Error`: Server error
+---
 
 ## Rate Limiting
 
-Rate limiting will be implemented in future versions.
+**Default:** 100 requests/hour per IP
+
+**Endpoint-Specific Limits:**
+- `/api/v1/datasets/search`: 30 req/min
+- `/api/v1/reflexion/process`: 10 req/min
+- `/api/v1/datasets/categories`: 60 req/min
+
+**Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1736640000000
+```
+
+---
+
+## Caching
+
+**Edge Caching with Cloudflare CDN:**
+- Categories: 30 minutes
+- Search: 5 minutes
+- Dataset by ID: 1 hour
+
+**Headers:**
+```
+X-Cache: HIT|MISS
+Cache-Control: public, max-age=1800
+```
+
+---
+
+## Endpoints
+
+### Quick Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| GET | `/api/v1/datasets` | List datasets |
+| GET | `/api/v1/datasets/categories` | Get categories |
+| GET | `/api/v1/datasets/:id` | Get dataset |
+| GET | `/api/v1/datasets/search?q=` | Search datasets |
+| GET | `/api/v1/datasets/:id/recommendations` | Get recommendations |
+| GET | `/api/v1/analytics/dashboard` | Analytics overview |
+| POST | `/api/v1/reflexion/process` | Process reflexion |
+
+For complete documentation, see: https://github.com/sahidattaf/reflexhon-global
+
+---
+
+## Response Format
+
+**Success:**
+```json
+{
+  "success": true,
+  "data": { ... }
+}
+```
+
+**Error:**
+```json
+{
+  "success": false,
+  "error": { "message": "..." }
+}
+```
+
+---
+
+## Error Handling
+
+| Code | Meaning |
+|------|---------|
+| 200 | OK |
+| 400 | Bad Request |
+| 404 | Not Found |
+| 429 | Rate Limit Exceeded |
+| 500 | Server Error |
+
+---
+
+**Last Updated:** 2026-01-12  
+**API Version:** 2.0.0
