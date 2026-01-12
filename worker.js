@@ -231,6 +231,10 @@ export default {
           const result = await dbService.query(sql);
 
           const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+          // Add cache headers
+          responseHeaders['X-Cache'] = 'MISS';
+          responseHeaders['Cache-Control'] = 'public, max-age=1800, stale-while-revalidate=3600';
+
           const response = new Response(
             JSON.stringify({
               success: true,
@@ -332,6 +336,10 @@ export default {
         }
 
         const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+        // Add cache headers
+        responseHeaders['X-Cache'] = 'MISS';
+        responseHeaders['Cache-Control'] = 'public, max-age=300, stale-while-revalidate=600';
+
         const response = new Response(
           JSON.stringify(result),
           { headers: responseHeaders, status: 200 }
