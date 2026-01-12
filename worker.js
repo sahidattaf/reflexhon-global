@@ -9,6 +9,8 @@ import { createRateLimiterService } from './services/rate-limiter.js';
 import { createCacheService } from './services/cache.js';
 import { createAnalyticsService } from './services/analytics.js';
 import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
+import { createRecommendationsService } from './services/recommendations.js';
+import { createRecommendationsRoutes } from './routes/recommendationsRoutes.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,6 +26,8 @@ export default {
     let cacheService = null;
     let analyticsService = null;
     let analyticsRoutes = null;
+    let recommendationsService = null;
+    let recommendationsRoutes = null;
     let dbEnabled = false;
 
     if (env.DB) {
@@ -33,6 +37,8 @@ export default {
         rateLimiter = createRateLimiterService(dbService);
         analyticsService = createAnalyticsService(dbService);
         analyticsRoutes = createAnalyticsRoutes(analyticsService);
+        recommendationsService = createRecommendationsService(dbService);
+        recommendationsRoutes = createRecommendationsRoutes(recommendationsService);
         dbEnabled = true;
       } catch (error) {
         console.error('Failed to initialize database:', error);
@@ -111,7 +117,7 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.6.0',
+            version: '1.7.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
@@ -121,7 +127,8 @@ export default {
               database: dbHealth,
               rate_limiting: rateLimiter ? 'enabled' : 'disabled',
               edge_caching: cacheService ? 'enabled' : 'disabled',
-              analytics: analyticsService ? 'enabled' : 'disabled'
+              analytics: analyticsService ? 'enabled' : 'disabled',
+              recommendations: recommendationsService ? 'enabled' : 'disabled'
             }
           }),
           { headers: corsHeaders, status: 200 }
@@ -852,6 +859,135 @@ export default {
         }
       }
 
+      // ===== RECOMMENDATIONS ENDPOINTS =====
+
+      // Get recommendations for a dataset (hybrid algorithm)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/recommendations\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.datasetRecommendations(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get similar datasets (content-based)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/similar\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.similar(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get users also viewed (collaborative filtering)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/also-viewed\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.alsoViewed(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get personalized recommendations
+      if (path === '/api/v1/recommendations/personalized' || path === '/api/v1/recommendations/personalized/') {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await recommendationsRoutes.personalized(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
       // Root endpoint
       if (path === '/' || path === '') {
         return new Response(
@@ -859,7 +995,7 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.6.0',
+            version: '1.7.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
@@ -869,7 +1005,8 @@ export default {
               '✅ API Analytics & Logging',
               rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)',
               cacheService ? '✅ Edge Caching (Global CDN)' : '🚧 Edge Caching (pending setup)',
-              analyticsService ? '✅ Analytics Dashboard & Insights' : '🚧 Analytics Dashboard (pending setup)'
+              analyticsService ? '✅ Analytics Dashboard & Insights' : '🚧 Analytics Dashboard (pending setup)',
+              recommendationsService ? '✅ Smart Recommendations (Hybrid AI)' : '🚧 Smart Recommendations (pending setup)'
             ],
             quick_start: {
               health: '/health',
@@ -878,7 +1015,8 @@ export default {
               reflexion: '/api/v1/reflexion',
               stats: '/api/v1/admin/stats',
               rate_limits: '/api/v1/admin/rate-limits',
-              analytics: '/api/v1/analytics/dashboard'
+              analytics: '/api/v1/analytics/dashboard',
+              recommendations: '/api/v1/datasets/papiamentu_001/recommendations'
             },
             documentation: 'https://github.com/sahidattaf/reflexhon-global'
           }),
