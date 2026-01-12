@@ -6,6 +6,7 @@ import { processReflexion, analyzeReasoning } from './reflexion.js';
 import { createDatabaseService, generateId, getCurrentTimestamp } from './services/db.js';
 import { createCulturalDataService } from './services/cultural-data.js';
 import { createRateLimiterService } from './services/rate-limiter.js';
+import { createCacheService } from './services/cache.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -18,6 +19,7 @@ export default {
     let dbService = null;
     let culturalData = null;
     let rateLimiter = null;
+    let cacheService = null;
     let dbEnabled = false;
 
     if (env.DB) {
@@ -29,6 +31,13 @@ export default {
       } catch (error) {
         console.error('Failed to initialize database:', error);
       }
+    }
+
+    // Initialize cache service (always available in Cloudflare Workers)
+    try {
+      cacheService = createCacheService(caches.default);
+    } catch (error) {
+      console.error('Failed to initialize cache:', error);
     }
 
     // CORS headers
@@ -96,7 +105,7 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.5.0',
+            version: '1.5.1',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
@@ -104,7 +113,8 @@ export default {
               huggingface_datasets: env.HF_TOKEN ? 'enabled' : 'disabled',
               huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
               database: dbHealth,
-              rate_limiting: rateLimiter ? 'enabled' : 'disabled'
+              rate_limiting: rateLimiter ? 'enabled' : 'disabled',
+              edge_caching: cacheService ? 'enabled' : 'disabled'
             }
           }),
           { headers: corsHeaders, status: 200 }
@@ -198,6 +208,18 @@ export default {
           );
         }
 
+        // Check cache first
+        if (cacheService) {
+          const cachedResponse = await cacheService.get(request, 'datasets_categories');
+          if (cachedResponse) {
+            const responseHeaders = addRateLimitHeaders(new Headers(cachedResponse.headers), rateLimitResult);
+            return new Response(cachedResponse.body, {
+              status: cachedResponse.status,
+              headers: responseHeaders
+            });
+          }
+        }
+
         try {
           const sql = `
             SELECT category, COUNT(*) as count
@@ -209,7 +231,7 @@ export default {
           const result = await dbService.query(sql);
 
           const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
-          return new Response(
+          const response = new Response(
             JSON.stringify({
               success: true,
               data: result.results,
@@ -217,6 +239,13 @@ export default {
             }),
             { headers: responseHeaders, status: 200 }
           );
+
+          // Store in cache (fire and forget)
+          if (cacheService) {
+            ctx.waitUntil(cacheService.put(request, response.clone(), 'datasets_categories'));
+          }
+
+          return response;
         } catch (error) {
           return new Response(
             JSON.stringify({
@@ -275,6 +304,18 @@ export default {
           );
         }
 
+        // Check cache first
+        if (cacheService) {
+          const cachedResponse = await cacheService.get(request, 'datasets_search');
+          if (cachedResponse) {
+            const responseHeaders = addRateLimitHeaders(new Headers(cachedResponse.headers), rateLimitResult);
+            return new Response(cachedResponse.body, {
+              status: cachedResponse.status,
+              headers: responseHeaders
+            });
+          }
+        }
+
         let result;
 
         if (dbEnabled && culturalData) {
@@ -291,10 +332,17 @@ export default {
         }
 
         const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
-        return new Response(
+        const response = new Response(
           JSON.stringify(result),
           { headers: responseHeaders, status: 200 }
         );
+
+        // Store in cache (fire and forget)
+        if (cacheService) {
+          ctx.waitUntil(cacheService.put(request, response.clone(), 'datasets_search'));
+        }
+
+        return response;
       }
 
       // Feedback endpoint for datasets
@@ -608,7 +656,7 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.5.0',
+            version: '1.5.1',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
@@ -616,7 +664,8 @@ export default {
               '✅ HuggingFace Integration (datasets + AI models)',
               dbEnabled ? '✅ D1 Database Integration' : '🚧 D1 Database Integration (pending setup)',
               '✅ API Analytics & Logging',
-              rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)'
+              rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)',
+              cacheService ? '✅ Edge Caching (Global CDN)' : '🚧 Edge Caching (pending setup)'
             ],
             quick_start: {
               health: '/health',
