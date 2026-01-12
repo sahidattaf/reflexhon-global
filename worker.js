@@ -7,6 +7,8 @@ import { createDatabaseService, generateId, getCurrentTimestamp } from './servic
 import { createCulturalDataService } from './services/cultural-data.js';
 import { createRateLimiterService } from './services/rate-limiter.js';
 import { createCacheService } from './services/cache.js';
+import { createAnalyticsService } from './services/analytics.js';
+import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -20,6 +22,8 @@ export default {
     let culturalData = null;
     let rateLimiter = null;
     let cacheService = null;
+    let analyticsService = null;
+    let analyticsRoutes = null;
     let dbEnabled = false;
 
     if (env.DB) {
@@ -27,6 +31,8 @@ export default {
         dbService = createDatabaseService(env.DB);
         culturalData = createCulturalDataService(dbService);
         rateLimiter = createRateLimiterService(dbService);
+        analyticsService = createAnalyticsService(dbService);
+        analyticsRoutes = createAnalyticsRoutes(analyticsService);
         dbEnabled = true;
       } catch (error) {
         console.error('Failed to initialize database:', error);
@@ -105,7 +111,7 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.5.1',
+            version: '1.6.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
@@ -114,7 +120,8 @@ export default {
               huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
               database: dbHealth,
               rate_limiting: rateLimiter ? 'enabled' : 'disabled',
-              edge_caching: cacheService ? 'enabled' : 'disabled'
+              edge_caching: cacheService ? 'enabled' : 'disabled',
+              analytics: analyticsService ? 'enabled' : 'disabled'
             }
           }),
           { headers: corsHeaders, status: 200 }
@@ -657,6 +664,194 @@ export default {
         }
       }
 
+      // ===== ANALYTICS ENDPOINTS =====
+
+      // Analytics dashboard overview
+      if (path === '/api/v1/analytics/dashboard' || path === '/api/v1/analytics/dashboard/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.dashboard(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics trending datasets
+      if (path === '/api/v1/analytics/trending' || path === '/api/v1/analytics/trending/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.trending(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics popular searches
+      if (path === '/api/v1/analytics/searches' || path === '/api/v1/analytics/searches/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.searches(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics traffic overview
+      if (path === '/api/v1/analytics/traffic' || path === '/api/v1/analytics/traffic/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.traffic(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics performance metrics
+      if (path === '/api/v1/analytics/performance' || path === '/api/v1/analytics/performance/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.performance(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics geographic distribution
+      if (path === '/api/v1/analytics/geographic' || path === '/api/v1/analytics/geographic/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.geographic(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
       // Root endpoint
       if (path === '/' || path === '') {
         return new Response(
@@ -664,7 +859,7 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.5.1',
+            version: '1.6.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
@@ -673,7 +868,8 @@ export default {
               dbEnabled ? '✅ D1 Database Integration' : '🚧 D1 Database Integration (pending setup)',
               '✅ API Analytics & Logging',
               rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)',
-              cacheService ? '✅ Edge Caching (Global CDN)' : '🚧 Edge Caching (pending setup)'
+              cacheService ? '✅ Edge Caching (Global CDN)' : '🚧 Edge Caching (pending setup)',
+              analyticsService ? '✅ Analytics Dashboard & Insights' : '🚧 Analytics Dashboard (pending setup)'
             ],
             quick_start: {
               health: '/health',
@@ -681,7 +877,8 @@ export default {
               datasets: '/api/v1/datasets',
               reflexion: '/api/v1/reflexion',
               stats: '/api/v1/admin/stats',
-              rate_limits: '/api/v1/admin/rate-limits'
+              rate_limits: '/api/v1/admin/rate-limits',
+              analytics: '/api/v1/analytics/dashboard'
             },
             documentation: 'https://github.com/sahidattaf/reflexhon-global'
           }),
