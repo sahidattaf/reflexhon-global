@@ -162,12 +162,16 @@ export default function ChatInterface() {
 
         {/* Suggestions */}
         <div className="mt-4 flex flex-wrap gap-2">
-          <p className="text-sm text-gray-600 w-full mb-2">Try asking:</p>
+          <p className="text-sm text-gray-600 w-full mb-2">💡 Try asking:</p>
           {[
             'Kiko ta empatia?',
             'What is love in Papiamentu culture?',
             'Tell me about Caribbean family values',
-            'Kiko ta Karnaval?'
+            'Kiko ta Karnaval?',
+            'Con nos por cuida naturalesa?',
+            'Kico ta tradicion di nos pais?',
+            'What are important values in Aruba?',
+            'Explain respect in Papiamentu'
           ].map((suggestion, index) => (
             <button
               key={index}
