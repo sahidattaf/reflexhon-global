@@ -9,6 +9,8 @@ function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('24h')
   const [error, setError] = useState(null)
+  const [showShareMenu, setShowShareMenu] = useState(false)
+  const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
     fetchAnalytics()
@@ -45,6 +47,44 @@ function AnalyticsDashboard() {
     }
   }
 
+  // Share functions
+  const handleShare = (platform) => {
+    const url = 'https://main.reflexhon-global.pages.dev'
+    const text = `🎉 Check out Reflexhon Global Analytics! 📊\n\n✨ ${dashboard?.overview?.totalRequests || 0} API Requests\n🌍 ${dashboard?.overview?.uniqueVisitors || 0} Visitors\n⚡ ${dashboard?.overview?.cacheHitRate?.toFixed(1) || 0}% Cache Hit Rate\n\n🏝️ Papiamentu Cultural AI powered by Cloudflare Workers`
+
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`
+    }
+
+    if (platform === 'copy') {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      })
+    } else if (platform === 'export') {
+      // Export analytics data as JSON
+      const exportData = {
+        timestamp: new Date().toISOString(),
+        timeRange,
+        dashboard,
+        trending,
+        searches
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `reflexhon-analytics-${timeRange}-${new Date().toISOString().split('T')[0]}.json`
+      link.click()
+    } else {
+      window.open(shareUrls[platform], '_blank', 'width=600,height=400')
+    }
+
+    setShowShareMenu(false)
+  }
+
   if (loading && !dashboard) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -73,26 +113,88 @@ function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Time Range Selector */}
+      {/* Header with Time Range Selector and Share Button */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">📊 Live Analytics Dashboard</h2>
           <p className="text-gray-600">Real-time insights from your Cultural AI API</p>
         </div>
-        <div className="flex gap-2">
-          {['1h', '24h', '7d', '30d'].map((range) => (
+        <div className="flex gap-3 items-center">
+          {/* Time Range Selector */}
+          <div className="flex gap-2">
+            {['1h', '24h', '7d', '30d'].map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  timeRange === range
+                    ? 'bg-caribbean-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+
+          {/* Share Button */}
+          <div className="relative">
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                timeRange === range
-                  ? 'bg-caribbean-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="px-4 py-2 bg-gradient-to-r from-caribbean-600 to-caribbean-700 text-white rounded-lg font-medium hover:from-caribbean-700 hover:to-caribbean-800 transition-all shadow-lg flex items-center gap-2"
             >
-              {range}
+              {copySuccess ? '✓ Copied!' : '🔗 Share'}
             </button>
-          ))}
+
+            {/* Share Dropdown Menu */}
+            {showShareMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10">
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">🐦</span>
+                  <span className="font-medium text-gray-700">Share on Twitter</span>
+                </button>
+                <button
+                  onClick={() => handleShare('linkedin')}
+                  className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">💼</span>
+                  <span className="font-medium text-gray-700">Share on LinkedIn</span>
+                </button>
+                <button
+                  onClick={() => handleShare('facebook')}
+                  className="w-full px-4 py-2 text-left hover:bg-blue-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">📘</span>
+                  <span className="font-medium text-gray-700">Share on Facebook</span>
+                </button>
+                <button
+                  onClick={() => handleShare('whatsapp')}
+                  className="w-full px-4 py-2 text-left hover:bg-green-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">💬</span>
+                  <span className="font-medium text-gray-700">Share on WhatsApp</span>
+                </button>
+                <hr className="my-2 border-gray-200" />
+                <button
+                  onClick={() => handleShare('copy')}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">📋</span>
+                  <span className="font-medium text-gray-700">Copy Link</span>
+                </button>
+                <button
+                  onClick={() => handleShare('export')}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  <span className="text-xl">💾</span>
+                  <span className="font-medium text-gray-700">Export Data (JSON)</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
