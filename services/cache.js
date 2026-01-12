@@ -141,20 +141,21 @@ export class CacheService {
       const cacheKey = this.generateCacheKey(request, cacheKeyType);
 
       // Clone response and add cache headers
-      const headers = new Headers(response.headers);
+      const clonedResponse = response.clone();
+      const headers = new Headers(clonedResponse.headers);
       headers.set('Cache-Control', `public, max-age=${config.ttl}, stale-while-revalidate=${config.staleWhileRevalidate}`);
       headers.set('X-Cache', 'MISS');
       headers.set('X-Cache-Type', cacheKeyType);
       headers.set('X-Cache-TTL', config.ttl.toString());
 
-      const cachedResponse = new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
+      const cachedResponse = new Response(clonedResponse.body, {
+        status: clonedResponse.status,
+        statusText: clonedResponse.statusText,
         headers: headers
       });
 
-      // Store in cache (don't await - fire and forget)
-      this.cache.put(cacheKey, cachedResponse);
+      // Store in cache - await to ensure it completes
+      await this.cache.put(cacheKey, cachedResponse);
     } catch (error) {
       console.error('Cache put error:', error);
     }
