@@ -4,8 +4,6 @@
  * Tracks and reports API usage statistics for the Live Analytics Dashboard
  */
 
-import { logger } from '../utils/logger.js';
-
 class AnalyticsService {
   constructor() {
     // In-memory analytics storage
@@ -74,7 +72,7 @@ class AnalyticsService {
         this.analytics.cacheMisses++;
       }
 
-      logger.info('Analytics tracked', {
+      console.log('Analytics tracked:', {
         path,
         status,
         responseTime: `${responseTime}ms`,
@@ -82,7 +80,7 @@ class AnalyticsService {
       });
 
     } catch (error) {
-      logger.error('Failed to track analytics', { error: error.message });
+      console.error('Failed to track analytics:', error.message);
     }
   }
 
@@ -236,7 +234,7 @@ class AnalyticsService {
         req => req.timestamp >= sevenDaysAgo
       );
 
-      logger.info('Analytics cleanup completed', {
+      console.log('Analytics cleanup completed:', {
         requests_remaining: this.analytics.requests.length
       });
     }, 60 * 60 * 1000); // Run every hour
@@ -255,7 +253,7 @@ class AnalyticsService {
       cacheMisses: 0
     };
 
-    logger.info('Analytics reset');
+    console.log('Analytics reset');
   }
 
   /**
