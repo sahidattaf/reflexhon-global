@@ -71,7 +71,42 @@ export default {
         }, corsHeaders);
       }
 
-      if (path === '/' || path === '/api' || path === '/api/') {
+      // =================================================================
+      // ROOT - Serve Full 3-Tab App (AI Chatbot)
+      // =================================================================
+      if (path === '/') {
+        // Serve index.html from /public directory (full 3-tab UI)
+        if (env.ASSETS) {
+          try {
+            const assetRequest = new Request(new URL('/index.html', request.url), request);
+            const asset = await env.ASSETS.fetch(assetRequest);
+            if (asset.status === 200) {
+              return new Response(asset.body, {
+                headers: {
+                  'Content-Type': 'text/html;charset=UTF-8',
+                  'Cache-Control': 'public, max-age=3600',
+                  ...corsHeaders
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Failed to serve root HTML:', e);
+          }
+        }
+        // Fallback to minimal HTML if assets not available
+        return new Response(getStudioHTML(), {
+          headers: {
+            'Content-Type': 'text/html;charset=UTF-8',
+            'Cache-Control': 'public, max-age=3600',
+            ...corsHeaders
+          }
+        });
+      }
+
+      // =================================================================
+      // API INFO - Documentation endpoint
+      // =================================================================
+      if (path === '/api' || path === '/api/') {
         return jsonResponse({
           name: 'Reflexhon Global API',
           version: '3.0.0',
@@ -87,7 +122,7 @@ export default {
             translate: 'POST /api/v1/translate',
             emotion: 'POST /api/v1/emotion',
             analytics: 'GET /api/v1/analytics',
-            studio: '/studio (UI)',
+            studio: '/ (Full UI)',
             analytics_dashboard: '/analytics (UI)'
           },
           documentation: 'See RELEASE_NOTES_v3.0.0.md',
