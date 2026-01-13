@@ -427,4 +427,5 @@ class SessionManager {
   }
 }
 
-export default SessionManager;
+// Export singleton instance
+export default new SessionManager();

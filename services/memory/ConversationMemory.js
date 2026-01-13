@@ -242,7 +242,7 @@ class ConversationMemory {
       return {
         success: true,
         session_id: sessionId,
-        summary
+        ...summary  // Spread summary fields to top level
       };
     } catch (error) {
       logger.error('Failed to summarize conversation', {
@@ -315,6 +315,9 @@ class ConversationMemory {
       return {
         success: true,
         relevant_messages: topRelevant,
+        relevance_score: topRelevant.length > 0
+          ? topRelevant[0].relevance_score
+          : 0,
         context: topRelevant.length > 0
           ? `Previous discussion touched on: ${topRelevant.map(m => m.content.substring(0, 50)).join('; ')}`
           : 'No directly relevant previous context'
@@ -498,4 +501,5 @@ class ConversationMemory {
   }
 }
 
-export default ConversationMemory;
+// Export singleton instance
+export default new ConversationMemory();
