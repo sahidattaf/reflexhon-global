@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reflexhon Studio - Cultural AI Platform</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .header {
+      background: #0891b2;
+      color: white;
+      padding: 2rem 2rem 1rem 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .palm-icon {
+      font-size: 2.5rem;
+    }
+
+    .header-subtitle {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .header-info {
+      text-align: right;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .version-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      display: inline-block;
+      margin-top: 0.25rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 2rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-tab {
+      padding: 0.75rem 1rem;
+      border: none;
+      background: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tab:hover {
+      color: white;
+    }
+
+    .nav-tab.active {
+      color: white;
+      border-bottom-color: white;
+    }
+
+    .nav-tab-icon {
+      margin-right: 0.5rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* AI Chat Styles */
+    .chat-container {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 2rem;
+      height: calc(100vh - 250px);
+    }
+
+    .chat-sidebar {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-sidebar h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+
+    .language-selector {
+      margin-bottom: 1.5rem;
+    }
+
+    .language-btn {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .language-btn:hover {
+      border-color: #0891b2;
+    }
+
+    .language-btn.active {
+      background: #0891b2;
+      color: white;
+      border-color: #0891b2;
+    }
+
+    .chat-main {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 1.5rem;
+      max-width: 80%;
+    }
+
+    .message.user {
+      margin-left: auto;
+    }
+
+    .message-content {
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .message.user .message-content {
+      background: #0891b2;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant .message-content {
+      background: #f3f4f6;
+      color: #1f2937;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-meta {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.5rem;
+    }
+
+    .chat-input-container {
+      padding: 1.5rem;
+      border-top: 2px solid #f3f4f6;
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      resize: none;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: #0891b2;
+    }
+
+    .send-btn {
+      padding: 1rem 2rem;
+      background: #0891b2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .send-btn:hover {
+      background: #0e7490;
+    }
+
+    .send-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    /* Dataset Explorer Styles */
+    .dataset-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dataset-search {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #0891b2;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: #0891b2;
+      color: #0891b2;
+    }
+
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .dataset-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dataset-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .dataset-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .dataset-category {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: #dbeafe;
+      color: #1e40af;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .dataset-content {
+      color: #6b7280;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .dataset-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0891b2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .welcome-message {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+
+    .welcome-message h3 {
+      font-size: 1.5rem;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 1rem;
+    }
+
+    .typing-indicator.active {
+      display: block;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      gap: 0.5rem;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">
+        <span class="palm-icon">🌴</span>
+        <h1>Reflexhon Studio</h1>
+      </div>
+      <div class="header-info">
+        <div>Reflexhon Global 2027</div>
+        <div style="font-size: 0.8rem; opacity: 0.8;">Caribbean • Aruba • Bonaire • Curaçao</div>
+        <div class="version-badge">v3.0.0 Cultural Intelligence</div>
+      </div>
+    </div>
+    <div class="header-subtitle">Human-Centered Intelligence • Papiamentu Cultural AI</div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="chat">
+        <span class="nav-tab-icon">💬</span> AI Chat
+      </button>
+      <button class="nav-tab" data-tab="datasets">
+        <span class="nav-tab-icon">📊</span> Dataset Explorer
+      </button>
+      <button class="nav-tab" data-tab="analytics">
+        <span class="nav-tab-icon">📈</span> Analytics
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- AI Chat Tab -->
+    <div class="tab-content active" id="chat">
+      <div class="chat-container">
+        <div class="chat-sidebar">
+          <h3>Language Settings</h3>
+          <div class="language-selector">
+            <button class="language-btn active" data-lang="papiamentu">
+              🇦🇼 Papiamentu
+            </button>
+            <button class="language-btn" data-lang="english">
+              🇬🇧 English
+            </button>
+            <button class="language-btn" data-lang="mixed">
+              🌐 Code-Switching
+            </button>
+          </div>
+
+          <h3>Cultural Context</h3>
+          <div class="language-selector">
+            <button class="language-btn active" data-context="caribbean">
+              🏝️ Caribbean
+            </button>
+            <button class="language-btn" data-context="formal">
+              📋 Formal
+            </button>
+            <button class="language-btn" data-context="casual">
+              😊 Casual
+            </button>
+          </div>
+
+          <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+            <div style="font-size: 0.85rem; color: #6b7280;">
+              <strong>Features Active:</strong><br>
+              ✓ 5-Layer Reflexion<br>
+              ✓ Papiamentu NLP<br>
+              ✓ Emotion Detection<br>
+              ✓ Cultural Alignment<br>
+              ✓ Memory & Learning
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-main">
+          <div class="chat-messages" id="chat-messages">
+            <div class="welcome-message">
+              <h3>Bon bini na Reflexhon Studio!</h3>
+              <p>Ask me anything in Papiamentu, English, or mix both languages naturally.</p>
+              <p style="margin-top: 1rem; font-size: 0.9rem;">
+                Try: <em>"Kiko ta empatia?"</em> or <em>"Explain respeto na nos kultura"</em>
+              </p>
+            </div>
+          </div>
+
+          <div class="typing-indicator" id="typing-indicator">
+            <div class="message assistant">
+              <div class="message-content">
+                <div class="typing-dots">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+              <textarea
+                class="chat-input"
+                id="chat-input"
+                placeholder="Type your message in Papiamentu or English..."
+                rows="1"
+              ></textarea>
+              <button class="send-btn" id="send-btn">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset Explorer Tab -->
+    <div class="tab-content" id="datasets">
+      <div class="dataset-header">
+        <h2>📊 Cultural Dataset Explorer</h2>
+        <p style="color: #6b7280; margin-top: 0.5rem;">
+          Explore 70+ Papiamentu cultural expressions and contexts
+        </p>
+        <div class="dataset-search">
+          <input
+            type="text"
+            class="search-input"
+            id="dataset-search"
+            placeholder="Search datasets by keyword, category, or language..."
+          />
+          <button class="filter-btn" id="filter-papiamentu">🇦🇼 Papiamentu</button>
+          <button class="filter-btn" id="filter-caribbean">🏝️ Caribbean</button>
+          <button class="filter-btn" id="filter-all">🌐 All</button>
+        </div>
+      </div>
+
+      <div class="dataset-grid" id="dataset-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+          <div class="loading"></div>
+          <p style="margin-top: 1rem; color: #6b7280;">Loading cultural datasets...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div class="tab-content" id="analytics">
+      <iframe
+        src="/analytics.html"
+        style="width: 100%; height: calc(100vh - 200px); border: none; border-radius: 12px;"
+      ></iframe>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+
+        // Update active tab
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update active content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(tabName).classList.add('active');
+
+        // Load datasets if switching to datasets tab
+        if (tabName === 'datasets') {
+          loadDatasets();
+        }
+      });
+    });
+
+    // Language/Context selector
+    document.querySelectorAll('.language-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Chat functionality
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+
+    function addMessage(content, isUser = false) {
+      const welcomeMsg = chatMessages.querySelector('.welcome-message');
+      if (welcomeMsg) welcomeMsg.remove();
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+      messageDiv.innerHTML = `
+        <div class="message-content">${content}</div>
+        <div class="message-meta">${new Date().toLocaleTimeString()}</div>
+      `;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, true);
+      chatInput.value = '';
+      sendBtn.disabled = true;
+
+      // Show typing indicator
+      typingIndicator.classList.add('active');
+
+      try {
+        // Get selected language and context
+        const language = document.querySelector('[data-lang].active')?.dataset.lang || 'papiamentu';
+        const context = document.querySelector('[data-context].active')?.dataset.context || 'caribbean';
+
+        // Call Reflexion API
+        const response = await fetch('/api/v1/reflexion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: message,
+            context: {
+              language: language,
+              culture: context,
+              situation: 'conversational'
+            },
+            persona: {
+              clarity: 80,
+              empathy: 90,
+              cultural: 100
+            },
+            options: {
+              include_reasoning: false
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        // Hide typing indicator
+        typingIndicator.classList.remove('active');
+
+        if (data.success) {
+          addMessage(data.data.response || data.data.output || 'Mi ta aki pa yuda bo.');
+        } else {
+          addMessage('Sorry, I encountered an error. Please try again.');
+        }
+
+      } catch (error) {
+        console.error('Chat error:', error);
+        typingIndicator.classList.remove('active');
+        addMessage('Mi ta sinti, but mi tin problema awo. Please try again.');
+      }
+
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Dataset Explorer functionality
+    async function loadDatasets() {
+      const grid = document.getElementById('dataset-grid');
+
+      try {
+        const response = await fetch('/api/v1/datasets');
+        const data = await response.json();
+
+        if (data.success && data.data && data.data.length > 0) {
+          grid.innerHTML = data.data.map(dataset => `
+            <div class="dataset-card">
+              <div class="dataset-title">${dataset.input || dataset.question || 'Cultural Expression'}</div>
+              <div class="dataset-category">${dataset.category || 'General'}</div>
+              <div class="dataset-content">${dataset.output || dataset.answer || dataset.response || ''}</div>
+              <div class="dataset-meta">
+                <span>ID: ${dataset.id || 'N/A'}</span>
+                <span>${dataset.language || 'Papiamentu'}</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+              <p style="color: #6b7280;">No datasets found. Check your API connection.</p>
+            </div>
+          `;
+        }
+
+      } catch (error) {
+        console.error('Failed to load datasets:', error);
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+            <p style="color: #ef4444;">Failed to load datasets. Make sure the API is running.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Dataset search
+    const searchInput = document.getElementById('dataset-search');
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll('.dataset-card');
+
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+      });
+    });
+
+    // Dataset filters
+    document.getElementById('filter-all').addEventListener('click', () => {
+      document.querySelectorAll('.dataset-card').forEach(card => {
+        card.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
