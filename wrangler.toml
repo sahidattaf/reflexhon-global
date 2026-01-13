@@ -6,6 +6,11 @@ account_id = "9a009ef5b0a39e042797e3218c05669c"
 
 workers_dev = true
 
+# Static Assets Configuration (serves files from /public directory)
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
 # Cloudflare AI binding (free tier: 10,000 requests/day)
 [ai]
 binding = "AI"

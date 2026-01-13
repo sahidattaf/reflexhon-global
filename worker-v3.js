@@ -104,10 +104,29 @@ export default {
       }
 
       // =================================================================
-      // UI ROUTES (Serve static HTML)
+      // UI ROUTES (Serve static HTML from /public directory)
       // =================================================================
 
       if (path === '/studio' || path === '/studio/') {
+        // Serve index.html from /public directory
+        if (env.ASSETS) {
+          try {
+            const assetRequest = new Request(new URL('/index.html', request.url), request);
+            const asset = await env.ASSETS.fetch(assetRequest);
+            if (asset.status === 200) {
+              return new Response(asset.body, {
+                headers: {
+                  'Content-Type': 'text/html;charset=UTF-8',
+                  'Cache-Control': 'public, max-age=3600',
+                  ...corsHeaders
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Failed to serve studio HTML:', e);
+          }
+        }
+        // Fallback to minimal HTML if assets not available
         return new Response(getStudioHTML(), {
           headers: {
             'Content-Type': 'text/html;charset=UTF-8',
@@ -118,6 +137,25 @@ export default {
       }
 
       if (path === '/analytics' || path === '/analytics/') {
+        // Serve analytics.html from /public directory
+        if (env.ASSETS) {
+          try {
+            const assetRequest = new Request(new URL('/analytics.html', request.url), request);
+            const asset = await env.ASSETS.fetch(assetRequest);
+            if (asset.status === 200) {
+              return new Response(asset.body, {
+                headers: {
+                  'Content-Type': 'text/html;charset=UTF-8',
+                  'Cache-Control': 'public, max-age=3600',
+                  ...corsHeaders
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Failed to serve analytics HTML:', e);
+          }
+        }
+        // Fallback to minimal HTML if assets not available
         return new Response(getAnalyticsHTML(), {
           headers: {
             'Content-Type': 'text/html;charset=UTF-8',
