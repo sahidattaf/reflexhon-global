@@ -1,89 +1,65 @@
-// Analytics Routes
-// Provides analytics dashboard endpoints
-
 /**
  * Analytics Routes
- * @param {Object} analyticsService - Analytics service instance
- * @returns {Object} Route handlers
+ *
+ * API endpoints for analytics dashboard
  */
-export function createAnalyticsRoutes(analyticsService) {
-  return {
-    /**
-     * GET /api/v1/analytics/dashboard
-     * Get analytics dashboard overview
-     */
-    dashboard: async (request, searchParams) => {
-      const timeRange = searchParams.get('range') || '24h';
 
-      const data = await analyticsService.getDashboard(timeRange);
+import express from 'express';
+import AnalyticsService from '../services/analytics/AnalyticsService.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { successResponse } from '../utils/response.js';
 
-      return {
-        success: true,
-        data,
-        timeRange
-      };
-    },
+const router = express.Router();
 
-    /**
-     * GET /api/v1/analytics/trending
-     * Get trending datasets
-     */
-    trending: async (request, searchParams) => {
-      const limit = parseInt(searchParams.get('limit') || '10', 10);
+/**
+ * GET /api/v1/analytics
+ * Get analytics summary
+ */
+router.get('/', asyncHandler(async (req, res) => {
+  const timeRange = parseInt(req.query.range) || 24; // Default: last 24 hours
 
-      const data = await analyticsService.getTrending(limit);
+  const analytics = AnalyticsService.getAnalytics(timeRange);
 
-      return data;
-    },
+  return successResponse(res, analytics, 'Analytics retrieved successfully');
+}));
 
-    /**
-     * GET /api/v1/analytics/searches
-     * Get popular search terms
-     */
-    searches: async (request, searchParams) => {
-      const limit = parseInt(searchParams.get('limit') || '20', 10);
+/**
+ * GET /api/v1/analytics/realtime
+ * Get real-time statistics
+ */
+router.get('/realtime', asyncHandler(async (req, res) => {
+  const realtimeStats = AnalyticsService.getRealTimeStats();
 
-      const data = await analyticsService.getPopularSearches(limit);
+  return successResponse(res, realtimeStats, 'Real-time stats retrieved');
+}));
 
-      return data;
-    },
+/**
+ * GET /api/v1/analytics/export
+ * Export all analytics data
+ */
+router.get('/export', asyncHandler(async (req, res) => {
+  const exportData = AnalyticsService.exportData();
 
-    /**
-     * GET /api/v1/analytics/traffic
-     * Get traffic overview
-     */
-    traffic: async (request, searchParams) => {
-      const timeRange = searchParams.get('range') || '24h';
+  return successResponse(res, exportData, 'Analytics data exported');
+}));
 
-      const data = await analyticsService.getTrafficOverview(timeRange);
+/**
+ * POST /api/v1/analytics/track
+ * Manually track an event (for testing)
+ */
+router.post('/track', asyncHandler(async (req, res) => {
+  const { path, method, status, responseTime } = req.body;
 
-      return data;
-    },
+  AnalyticsService.trackRequest({
+    path: path || req.path,
+    method: method || req.method,
+    status: status || 200,
+    responseTime: responseTime || 0,
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
 
-    /**
-     * GET /api/v1/analytics/performance
-     * Get performance metrics
-     */
-    performance: async (request, searchParams) => {
-      const timeRange = searchParams.get('range') || '24h';
+  return successResponse(res, { tracked: true }, 'Event tracked successfully');
+}));
 
-      const data = await analyticsService.getPerformanceMetrics(timeRange);
-
-      return data;
-    },
-
-    /**
-     * GET /api/v1/analytics/geographic
-     * Get geographic distribution
-     */
-    geographic: async (request, searchParams) => {
-      const timeRange = searchParams.get('range') || '24h';
-
-      const data = await analyticsService.getGeographicDistribution(timeRange);
-
-      return data;
-    }
-  };
-}
-
-export default createAnalyticsRoutes;
+export default router;

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reflexhon Studio - Live Analytics Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .header {
+      background: #0891b2;
+      color: white;
+      padding: 2rem 2rem 1rem 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title h1 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .palm-icon {
+      font-size: 2.5rem;
+    }
+
+    .header-subtitle {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 2rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-tab {
+      padding: 0.75rem 1rem;
+      border: none;
+      background: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .nav-tab:hover {
+      color: white;
+    }
+
+    .nav-tab.active {
+      color: white;
+      border-bottom-color: white;
+    }
+
+    .nav-tab-icon {
+      margin-right: 0.5rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .dashboard-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-title h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .dashboard-subtitle {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    .time-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .time-btn {
+      padding: 0.5rem 1.25rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      color: #6b7280;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .time-btn:hover {
+      border-color: #0891b2;
+      color: #0891b2;
+    }
+
+    .time-btn.active {
+      background: #0891b2;
+      border-color: #0891b2;
+      color: white;
+    }
+
+    .share-btn {
+      padding: 0.5rem 1.5rem;
+      background: #0891b2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      transition: all 0.2s ease;
+    }
+
+    .share-btn:hover {
+      background: #0e7490;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .metric-card.blue::before { background: #3b82f6; }
+    .metric-card.green::before { background: #10b981; }
+    .metric-card.purple::before { background: #8b5cf6; }
+    .metric-card.orange::before { background: #f97316; }
+
+    .metric-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+
+    .metric-label {
+      color: #6b7280;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-subtitle {
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .chart-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+
+    .chart-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .endpoint-list {
+      list-style: none;
+    }
+
+    .endpoint-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.2s ease;
+    }
+
+    .endpoint-item:hover {
+      background: #f9fafb;
+    }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+
+    .endpoint-count {
+      background: #eff6ff;
+      color: #1e40af;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .status-code {
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-2xx { color: #10b981; }
+    .status-3xx { color: #3b82f6; }
+    .status-4xx { color: #f59e0b; }
+    .status-5xx { color: #ef4444; }
+
+    .status-count {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #1f2937;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #0891b2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .update-time {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">
+        <span class="palm-icon">🌴</span>
+        <h1>Reflexhon Studio</h1>
+      </div>
+      <div style="color: white; text-align: right;">
+        <div style="font-size: 0.9rem; opacity: 0.9;">Reflexhon Global 2027</div>
+        <div style="font-size: 0.8rem; opacity: 0.8;">Caribbean • Aruba • Bonaire • Curaçao</div>
+      </div>
+    </div>
+    <div class="header-subtitle">Human-Centered Intelligence • Papiamentu Cultural AI</div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab">
+        <span class="nav-tab-icon">💬</span> AI Chat
+      </button>
+      <button class="nav-tab">
+        <span class="nav-tab-icon">📊</span> Dataset Explorer
+      </button>
+      <button class="nav-tab active">
+        <span class="nav-tab-icon">📈</span> Analytics
+      </button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div class="dashboard-title">
+            <span style="font-size: 2rem;">📊</span>
+            <h2>Live Analytics Dashboard</h2>
+          </div>
+          <p class="dashboard-subtitle">Real-time insights from your Cultural AI API</p>
+        </div>
+        <button class="share-btn">
+          <span>🔗</span> Share
+        </button>
+      </div>
+
+      <div class="time-selector">
+        <button class="time-btn">1h</button>
+        <button class="time-btn active">24h</button>
+        <button class="time-btn">7d</button>
+        <button class="time-btn">30d</button>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card blue">
+        <div class="metric-icon">📈</div>
+        <div class="metric-label">Total Requests</div>
+        <div class="metric-value" id="total-requests">
+          <span class="loading"></span>
+        </div>
+        <div class="metric-subtitle">API calls</div>
+      </div>
+
+      <div class="metric-card green">
+        <div class="metric-icon">👥</div>
+        <div class="metric-label">Unique Visitors</div>
+        <div class="metric-value" id="unique-visitors">
+          <span class="loading"></span>
+        </div>
+        <div class="metric-subtitle">Worldwide</div>
+      </div>
+
+      <div class="metric-card purple">
+        <div class="metric-icon">⚡</div>
+        <div class="metric-label">Cache Hit Rate</div>
+        <div class="metric-value" id="cache-rate">
+          <span class="loading"></span>
+        </div>
+        <div class="metric-subtitle" id="cache-subtitle">0 hits / 0 misses</div>
+      </div>
+
+      <div class="metric-card orange">
+        <div class="metric-icon">🌍</div>
+        <div class="metric-label">Global Edge</div>
+        <div class="metric-value">300+</div>
+        <div class="metric-subtitle">Cloudflare locations</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span style="font-size: 1.5rem;">🎯</span>
+          <h3>Top Endpoints</h3>
+        </div>
+        <ul class="endpoint-list" id="top-endpoints">
+          <li class="endpoint-item">
+            <span class="endpoint-path"><span class="loading"></span></span>
+            <span class="endpoint-count">...</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span style="font-size: 1.5rem;">📊</span>
+          <h3>Status Codes</h3>
+        </div>
+        <div class="status-grid" id="status-codes">
+          <div class="status-item">
+            <span class="status-code status-2xx">Loading...</span>
+            <span class="status-count"><span class="loading"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="update-time" id="update-time">
+      Last updated: <span id="timestamp">--:--:--</span> • Auto-refreshes every 30 seconds
+    </div>
+  </div>
+
+  <script>
+    // Analytics data fetching and display
+    let refreshInterval;
+
+    async function fetchAnalytics() {
+      try {
+        const response = await fetch('/api/v1/analytics');
+        const data = await response.json();
+
+        // Update metrics
+        document.getElementById('total-requests').textContent = data.total_requests?.toLocaleString() || '0';
+        document.getElementById('unique-visitors').textContent = data.unique_visitors?.toLocaleString() || '0';
+
+        const cacheRate = data.cache_hit_rate || 0;
+        document.getElementById('cache-rate').textContent = `${cacheRate.toFixed(1)}%`;
+        document.getElementById('cache-subtitle').textContent =
+          `${data.cache_hits || 0} hits / ${data.cache_misses || 0} misses`;
+
+        // Update top endpoints
+        const endpointsList = document.getElementById('top-endpoints');
+        if (data.top_endpoints && data.top_endpoints.length > 0) {
+          endpointsList.innerHTML = data.top_endpoints.map(endpoint => `
+            <li class="endpoint-item">
+              <span class="endpoint-path">${endpoint.path}</span>
+              <span class="endpoint-count">${endpoint.count.toLocaleString()}</span>
+            </li>
+          `).join('');
+        } else {
+          endpointsList.innerHTML = `
+            <li class="endpoint-item">
+              <span class="endpoint-path">/api/v1/datasets</span>
+              <span class="endpoint-count">0</span>
+            </li>
+          `;
+        }
+
+        // Update status codes
+        const statusGrid = document.getElementById('status-codes');
+        const statusCodes = data.status_codes || { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 };
+        statusGrid.innerHTML = Object.entries(statusCodes).map(([code, count]) => `
+          <div class="status-item">
+            <span class="status-code status-${code}">${code}</span>
+            <span class="status-count">${count.toLocaleString()}</span>
+          </div>
+        `).join('');
+
+        // Update timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+        // Show demo data if API not available
+        showDemoData();
+      }
+    }
+
+    function showDemoData() {
+      document.getElementById('total-requests').textContent = '0';
+      document.getElementById('unique-visitors').textContent = '0';
+      document.getElementById('cache-rate').textContent = '0.0%';
+      document.getElementById('cache-subtitle').textContent = '0 hits / 0 misses';
+
+      document.getElementById('top-endpoints').innerHTML = `
+        <li class="endpoint-item">
+          <span class="endpoint-path">/api/v1/datasets</span>
+          <span class="endpoint-count">0</span>
+        </li>
+        <li class="endpoint-item">
+          <span class="endpoint-path">/api/v1/reflexion</span>
+          <span class="endpoint-count">0</span>
+        </li>
+        <li class="endpoint-item">
+          <span class="endpoint-path">/api/v1/translate</span>
+          <span class="endpoint-count">0</span>
+        </li>
+      `;
+
+      document.getElementById('status-codes').innerHTML = `
+        <div class="status-item">
+          <span class="status-code status-2xx">2xx</span>
+          <span class="status-count">0</span>
+        </div>
+        <div class="status-item">
+          <span class="status-code status-4xx">4xx</span>
+          <span class="status-count">0</span>
+        </div>
+        <div class="status-item">
+          <span class="status-code status-5xx">5xx</span>
+          <span class="status-count">0</span>
+        </div>
+      `;
+
+      document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Time selector functionality
+    document.querySelectorAll('.time-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        fetchAnalytics();
+      });
+    });
+
+    // Share button
+    document.querySelector('.share-btn').addEventListener('click', async () => {
+      const url = window.location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        alert('Dashboard URL copied to clipboard!');
+      } catch (err) {
+        prompt('Copy this URL:', url);
+      }
+    });
+
+    // Initial load and auto-refresh
+    fetchAnalytics();
+    refreshInterval = setInterval(fetchAnalytics, 30000); // Refresh every 30 seconds
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      clearInterval(refreshInterval);
+    });
+  </script>
+</body>
+</html>
