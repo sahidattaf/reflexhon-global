@@ -1,5 +1,5 @@
 name = "reflexhon-global"
-main = "worker.js"
+main = "worker-v3.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 account_id = "9a009ef5b0a39e042797e3218c05669c"
@@ -14,7 +14,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "reflexhon_global"
-database_id = "PLACEHOLDER_DB_ID"  # Will be replaced after creating database with: wrangler d1 create reflexhon_global
+database_id = "a879199e-f6f7-45bf-a8c9-08bf0e302dd6"  # Created: 2026-01-10
 
 [vars]
 NODE_ENV = "production"

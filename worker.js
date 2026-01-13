@@ -5,6 +5,12 @@ import { getAllDatasets, getDatasetById, searchDatasets } from './datasets.js';
 import { processReflexion, analyzeReasoning } from './reflexion.js';
 import { createDatabaseService, generateId, getCurrentTimestamp } from './services/db.js';
 import { createCulturalDataService } from './services/cultural-data.js';
+import { createRateLimiterService } from './services/rate-limiter.js';
+import { createCacheService } from './services/cache.js';
+import { createAnalyticsService } from './services/analytics.js';
+import { createAnalyticsRoutes } from './routes/analyticsRoutes.js';
+import { createRecommendationsService } from './services/recommendations.js';
+import { createRecommendationsRoutes } from './routes/recommendationsRoutes.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -16,16 +22,34 @@ export default {
     // Initialize database services if D1 is available
     let dbService = null;
     let culturalData = null;
+    let rateLimiter = null;
+    let cacheService = null;
+    let analyticsService = null;
+    let analyticsRoutes = null;
+    let recommendationsService = null;
+    let recommendationsRoutes = null;
     let dbEnabled = false;
 
     if (env.DB) {
       try {
         dbService = createDatabaseService(env.DB);
         culturalData = createCulturalDataService(dbService);
+        rateLimiter = createRateLimiterService(dbService);
+        analyticsService = createAnalyticsService(dbService);
+        analyticsRoutes = createAnalyticsRoutes(analyticsService);
+        recommendationsService = createRecommendationsService(dbService);
+        recommendationsRoutes = createRecommendationsRoutes(recommendationsService);
         dbEnabled = true;
       } catch (error) {
         console.error('Failed to initialize database:', error);
       }
+    }
+
+    // Initialize cache service (always available in Cloudflare Workers)
+    try {
+      cacheService = createCacheService(caches.default);
+    } catch (error) {
+      console.error('Failed to initialize cache:', error);
     }
 
     // CORS headers
@@ -41,7 +65,43 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Helper function to add rate limit headers
+    const addRateLimitHeaders = (headers, rateLimit) => {
+      if (rateLimit && rateLimit.success) {
+        headers['X-RateLimit-Limit'] = rateLimit.limit?.toString() || '100';
+        headers['X-RateLimit-Remaining'] = rateLimit.remaining?.toString() || '0';
+        headers['X-RateLimit-Reset'] = rateLimit.reset?.toString() || '';
+        if (rateLimit.retryAfter) {
+          headers['Retry-After'] = rateLimit.retryAfter.toString();
+        }
+      }
+      return headers;
+    };
+
     try {
+      // Rate limiting (skip for health check and API info)
+      let rateLimitResult = null;
+      if (rateLimiter && path !== '/health' && path !== '/health/' && path !== '/api' && path !== '/api/' && path !== '/' && path !== '') {
+        const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+        rateLimitResult = await rateLimiter.checkRateLimit(clientIp, path);
+
+        if (!rateLimitResult.allowed) {
+          const rateLimitHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: {
+                message: 'Too Many Requests',
+                code: 'RATE_LIMIT_EXCEEDED',
+                limit: rateLimitResult.limit,
+                retryAfter: rateLimitResult.retryAfter
+              }
+            }),
+            { headers: rateLimitHeaders, status: 429 }
+          );
+        }
+      }
+
       // Health check endpoint
       if (path === '/health' || path === '/health/') {
         // Test database connection if available
@@ -57,14 +117,18 @@ export default {
             timestamp: new Date().toISOString(),
             message: 'Reflexhon Global API is running on Cloudflare Workers',
             environment: env.NODE_ENV || 'production',
-            version: '1.3.0',
+            version: '2.0.0',
             features: {
               datasets: 'enabled',
               reflexion: 'enabled',
               cloudflare_ai: env.AI ? 'enabled' : 'disabled',
               huggingface_datasets: env.HF_TOKEN ? 'enabled' : 'disabled',
               huggingface_ai: (env.HF_TOKEN && env.HF_MODEL) ? 'enabled' : 'disabled',
-              database: dbHealth
+              database: dbHealth,
+              rate_limiting: rateLimiter ? 'enabled' : 'disabled',
+              edge_caching: cacheService ? 'enabled' : 'disabled',
+              analytics: analyticsService ? 'enabled' : 'disabled',
+              recommendations: recommendationsService ? 'enabled' : 'disabled'
             }
           }),
           { headers: corsHeaders, status: 200 }
@@ -89,17 +153,33 @@ export default {
                 list: {
                   path: '/api/v1/datasets',
                   method: 'GET',
-                  description: 'List all cultural alignment datasets'
+                  description: 'List all cultural alignment datasets',
+                  params: 'limit, offset, category, language'
+                },
+                categories: {
+                  path: '/api/v1/datasets/categories',
+                  method: 'GET',
+                  description: 'Get all available categories with counts'
                 },
                 get: {
                   path: '/api/v1/datasets/:id',
                   method: 'GET',
-                  description: 'Get specific dataset by ID'
+                  description: 'Get specific dataset by ID (auto-tracks usage)'
                 },
                 search: {
                   path: '/api/v1/datasets/search?q=query',
                   method: 'GET',
-                  description: 'Search datasets by content'
+                  description: 'Search datasets using FTS5 full-text search',
+                  params: 'q (required), category, limit'
+                },
+                feedback: {
+                  path: '/api/v1/datasets/:id/feedback',
+                  method: 'POST',
+                  description: 'Submit feedback for a dataset',
+                  body: {
+                    positive: 'boolean (required) - true for positive, false for negative',
+                    comment: 'string (optional) - user comment'
+                  }
                 }
               },
               reflexion: {
@@ -129,6 +209,71 @@ export default {
       }
 
       // ===== DATASET ENDPOINTS =====
+
+      // Get available categories
+      if (path === '/api/v1/datasets/categories' || path === '/api/v1/datasets/categories/') {
+        if (!dbEnabled || !culturalData) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Database is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        // Check cache first
+        if (cacheService) {
+          const cachedResponse = await cacheService.get(request, 'datasets_categories');
+          if (cachedResponse) {
+            const responseHeaders = addRateLimitHeaders(new Headers(cachedResponse.headers), rateLimitResult);
+            return new Response(cachedResponse.body, {
+              status: cachedResponse.status,
+              headers: responseHeaders
+            });
+          }
+        }
+
+        try {
+          const sql = `
+            SELECT category, COUNT(*) as count
+            FROM cultural_datasets
+            WHERE is_active = 1 AND deleted_at IS NULL
+            GROUP BY category
+            ORDER BY category
+          `;
+          const result = await dbService.query(sql);
+
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+          // Add cache headers
+          responseHeaders['X-Cache'] = 'MISS';
+          responseHeaders['Cache-Control'] = 'public, max-age=1800, stale-while-revalidate=3600';
+
+          const response = new Response(
+            JSON.stringify({
+              success: true,
+              data: result.results,
+              total: result.results.length
+            }),
+            { headers: responseHeaders, status: 200 }
+          );
+
+          // Store in cache (fire and forget)
+          if (cacheService) {
+            ctx.waitUntil(cacheService.put(request, response.clone(), 'datasets_categories'));
+          }
+
+          return response;
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
 
       // List all datasets (D1 if available, otherwise fallback)
       if (path === '/api/v1/datasets' || path === '/api/v1/datasets/') {
@@ -177,6 +322,18 @@ export default {
           );
         }
 
+        // Check cache first
+        if (cacheService) {
+          const cachedResponse = await cacheService.get(request, 'datasets_search');
+          if (cachedResponse) {
+            const responseHeaders = addRateLimitHeaders(new Headers(cachedResponse.headers), rateLimitResult);
+            return new Response(cachedResponse.body, {
+              status: cachedResponse.status,
+              headers: responseHeaders
+            });
+          }
+        }
+
         let result;
 
         if (dbEnabled && culturalData) {
@@ -192,9 +349,90 @@ export default {
           result.source = 'fallback';
         }
 
-        return new Response(
+        const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+        // Add cache headers
+        responseHeaders['X-Cache'] = 'MISS';
+        responseHeaders['Cache-Control'] = 'public, max-age=300, stale-while-revalidate=600';
+
+        const response = new Response(
           JSON.stringify(result),
-          { headers: corsHeaders, status: 200 }
+          { headers: responseHeaders, status: 200 }
+        );
+
+        // Store in cache (fire and forget)
+        if (cacheService) {
+          ctx.waitUntil(cacheService.put(request, response.clone(), 'datasets_search'));
+        }
+
+        return response;
+      }
+
+      // Feedback endpoint for datasets
+      const feedbackMatch = path.match(/^\/api\/v1\/datasets\/([^\/]+)\/feedback\/?$/);
+      if (feedbackMatch) {
+        if (request.method !== 'POST') {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Method not allowed. Use POST.' }
+            }),
+            { headers: corsHeaders, status: 405 }
+          );
+        }
+
+        if (!dbEnabled || !culturalData) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Database is not enabled. Feedback requires D1 database.' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        const id = feedbackMatch[1];
+        const body = await request.json().catch(() => null);
+
+        if (!body || typeof body.positive !== 'boolean') {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Request body must include "positive" field (boolean)' }
+            }),
+            { headers: corsHeaders, status: 400 }
+          );
+        }
+
+        const result = await culturalData.addFeedback(id, body.positive);
+
+        // Also log feedback to cultural_feedback table if needed
+        if (result.success && dbService) {
+          try {
+            await dbService.insert('cultural_feedback', {
+              id: generateId(),
+              dataset_id: id,
+              feedback_type: body.positive ? 'positive' : 'negative',
+              user_comment: body.comment || null,
+              session_id: requestId,
+              ip_address: request.headers.get('CF-Connecting-IP') || null,
+              created_at: getCurrentTimestamp()
+            });
+          } catch (error) {
+            console.error('Failed to log feedback to cultural_feedback table:', error);
+          }
+        }
+
+        const status = result.success ? 200 : 500;
+
+        return new Response(
+          JSON.stringify({
+            success: result.success,
+            message: result.success
+              ? `${body.positive ? 'Positive' : 'Negative'} feedback recorded`
+              : 'Failed to record feedback',
+            error: result.error || null
+          }),
+          { headers: corsHeaders, status }
         );
       }
 
@@ -402,6 +640,354 @@ export default {
         }
       }
 
+      // Rate limit stats endpoint
+      if (path === '/api/v1/admin/rate-limits' || path === '/api/v1/admin/rate-limits/') {
+        if (!dbEnabled || !rateLimiter) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Rate limiting is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const clientIp = url.searchParams.get('ip') || null;
+          const stats = await rateLimiter.getStats(clientIp);
+
+          return new Response(
+            JSON.stringify(stats),
+            { headers: corsHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // ===== ANALYTICS ENDPOINTS =====
+
+      // Analytics dashboard overview
+      if (path === '/api/v1/analytics/dashboard' || path === '/api/v1/analytics/dashboard/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.dashboard(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics trending datasets
+      if (path === '/api/v1/analytics/trending' || path === '/api/v1/analytics/trending/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.trending(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics popular searches
+      if (path === '/api/v1/analytics/searches' || path === '/api/v1/analytics/searches/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.searches(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics traffic overview
+      if (path === '/api/v1/analytics/traffic' || path === '/api/v1/analytics/traffic/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.traffic(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics performance metrics
+      if (path === '/api/v1/analytics/performance' || path === '/api/v1/analytics/performance/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.performance(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Analytics geographic distribution
+      if (path === '/api/v1/analytics/geographic' || path === '/api/v1/analytics/geographic/') {
+        if (!analyticsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Analytics is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await analyticsRoutes.geographic(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // ===== RECOMMENDATIONS ENDPOINTS =====
+
+      // Get recommendations for a dataset (hybrid algorithm)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/recommendations\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.datasetRecommendations(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get similar datasets (content-based)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/similar\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.similar(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get users also viewed (collaborative filtering)
+      if (path.match(/^\/api\/v1\/datasets\/[^/]+\/also-viewed\/?$/)) {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const datasetId = path.split('/')[4];
+          const data = await recommendationsRoutes.alsoViewed(datasetId, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
+      // Get personalized recommendations
+      if (path === '/api/v1/recommendations/personalized' || path === '/api/v1/recommendations/personalized/') {
+        if (!recommendationsRoutes) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: 'Recommendations is not enabled' }
+            }),
+            { headers: corsHeaders, status: 503 }
+          );
+        }
+
+        try {
+          const data = await recommendationsRoutes.personalized(request, url.searchParams);
+          const responseHeaders = addRateLimitHeaders({ ...corsHeaders }, rateLimitResult);
+
+          return new Response(
+            JSON.stringify(data),
+            { headers: responseHeaders, status: 200 }
+          );
+        } catch (error) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: { message: error.message }
+            }),
+            { headers: corsHeaders, status: 500 }
+          );
+        }
+      }
+
       // Root endpoint
       if (path === '/' || path === '') {
         return new Response(
@@ -409,21 +995,28 @@ export default {
             success: true,
             message: 'Welcome to Reflexhon Global API',
             tagline: 'Cultural AI Alignment for Papiamentu',
-            version: '1.3.0',
+            version: '2.0.0',
             status: 'production',
             features: [
               '✅ Cultural Alignment Datasets',
               '✅ Reflexion Processing Engine',
               '✅ HuggingFace Integration (datasets + AI models)',
               dbEnabled ? '✅ D1 Database Integration' : '🚧 D1 Database Integration (pending setup)',
-              '✅ API Analytics & Logging'
+              '✅ API Analytics & Logging',
+              rateLimiter ? '✅ Rate Limiting Protection' : '🚧 Rate Limiting (pending setup)',
+              cacheService ? '✅ Edge Caching (Global CDN)' : '🚧 Edge Caching (pending setup)',
+              analyticsService ? '✅ Analytics Dashboard & Insights' : '🚧 Analytics Dashboard (pending setup)',
+              recommendationsService ? '✅ Smart Recommendations (Hybrid AI)' : '🚧 Smart Recommendations (pending setup)'
             ],
             quick_start: {
               health: '/health',
               api_docs: '/api',
               datasets: '/api/v1/datasets',
               reflexion: '/api/v1/reflexion',
-              stats: '/api/v1/admin/stats'
+              stats: '/api/v1/admin/stats',
+              rate_limits: '/api/v1/admin/rate-limits',
+              analytics: '/api/v1/analytics/dashboard',
+              recommendations: '/api/v1/datasets/papiamentu_001/recommendations'
             },
             documentation: 'https://github.com/sahidattaf/reflexhon-global'
           }),

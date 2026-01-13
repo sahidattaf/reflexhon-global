@@ -1,6 +1,7 @@
 import express from 'express';
 import datasetRoutes from '../routes/datasetRoutes.js';
 import reflexionRoutes from '../routes/reflexionRoutes.js';
+import analyticsRoutes from '../routes/analyticsRoutes.js';
 import { config } from '../config/index.js';
 
 const router = express.Router();
@@ -11,6 +12,7 @@ const v1Router = express.Router();
 // Mount routes
 v1Router.use('/datasets', datasetRoutes);
 v1Router.use('/reflexion', reflexionRoutes);
+v1Router.use('/analytics', analyticsRoutes);
 
 // Version routing
 router.use('/v1', v1Router);
@@ -23,7 +25,8 @@ router.get('/', (req, res) => {
     status: 'active',
     endpoints: {
       datasets: '/api/v1/datasets',
-      reflexion: '/api/v1/reflexion'
+      reflexion: '/api/v1/reflexion',
+      analytics: '/api/v1/analytics'
     }
   });
 });

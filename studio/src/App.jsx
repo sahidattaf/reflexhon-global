@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChatInterface from './components/ChatInterface'
 import DatasetExplorer from './components/DatasetExplorer'
+import AnalyticsDashboard from './components/AnalyticsDashboard'
 
 function App() {
   const [activeTab, setActiveTab] = useState('chat')
@@ -49,6 +50,16 @@ function App() {
             >
               📚 Dataset Explorer
             </button>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'analytics'
+                  ? 'border-caribbean-600 text-caribbean-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              📊 Analytics
+            </button>
           </div>
         </div>
       </nav>
@@ -57,6 +68,7 @@ function App() {
       <main className="container mx-auto px-6 py-8">
         {activeTab === 'chat' && <ChatInterface />}
         {activeTab === 'explorer' && <DatasetExplorer />}
+        {activeTab === 'analytics' && <AnalyticsDashboard />}
       </main>
 
       {/* Footer */}
@@ -64,10 +76,10 @@ function App() {
         <div className="container mx-auto px-6 py-6">
           <div className="text-center text-gray-600 text-sm">
             <p className="mb-2">
-              Powered by Cloudflare Workers AI • Built with Cultural Alignment
+              <span className="font-bold text-caribbean-600">v2.0.0</span> • Powered by Cloudflare Workers AI • Built with Cultural Alignment
             </p>
             <p className="text-xs text-gray-500">
-              70+ culturally-aligned Papiamentu datasets • Caribbean heritage preservation
+              70+ culturally-aligned Papiamentu datasets • Real-time Analytics • Smart AI Recommendations • Caribbean heritage preservation
             </p>
           </div>
         </div>

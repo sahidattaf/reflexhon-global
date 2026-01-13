@@ -7,8 +7,11 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "jest --passWithNoTests",
-    "lint": "eslint ."
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests",
+    "lint": "eslint .",
+    "deploy": "npx wrangler deploy",
+    "deploy:dev": "npx wrangler dev",
+    "deploy:tail": "npx wrangler tail"
   },
   "keywords": [
     "reflexhon",
