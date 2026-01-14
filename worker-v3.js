@@ -11,11 +11,11 @@
  */
 
 // Import v3.0.0 Services
-// NOTE: Advanced services available but not fully integrated yet
-// Phase 2 (D1 Database) is required for full functionality
-// Current version: STABLE with basic intelligence
+// Phase 2: D1 Database Integration Active!
+// Current version: v3.0.0-data-layer
 
 import ReflexionEngine from './services/reflexion/ReflexionEngine.js';
+import DatabaseService from './services/db/DatabaseService.js';
 import { getAllDatasets } from './datasets.js';
 
 // Advanced services (Phase 3) - Will be integrated after Phase 2 completion
@@ -33,6 +33,11 @@ export default {
     const path = url.pathname;
     const method = request.method;
     const startTime = Date.now();
+
+    // Initialize D1 Database if available
+    if (env.DB && !DatabaseService.isInitialized()) {
+      DatabaseService.initialize(env.DB);
+    }
 
     try {
       // CORS headers for all responses
@@ -227,10 +232,18 @@ export default {
       }, {}, 500);
 
     } finally {
-      // Track analytics (non-blocking)
+      // Track analytics to D1 (non-blocking)
       const responseTime = Date.now() - startTime;
       ctx.waitUntil(
-        trackAnalytics(path, method, 200, responseTime, request.headers.get('cf-connecting-ip'))
+        trackAnalytics(
+          path,
+          method,
+          200,
+          responseTime,
+          request.headers.get('cf-connecting-ip'),
+          request.headers.get('user-agent'),
+          null // sessionId would come from request if available
+        )
       );
     }
   }
@@ -280,10 +293,27 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       });
 
       // ===================================================================
-      // LAYER 4: Dataset Matching & Response Generation
+      // LAYER 4: Dataset Matching & Response Generation (D1 Database!)
       // ===================================================================
-      const datasetsResult = await getAllDatasets(env);
-      const datasets = datasetsResult.data || [];
+      let datasets = [];
+
+      if (DatabaseService.isInitialized()) {
+        // Use D1 database with FTS5 full-text search
+        datasets = await DatabaseService.searchDatasets(input, 20);
+
+        // Track search analytics
+        ctx.waitUntil(
+          DatabaseService.trackSearch({
+            session_id: sessionId,
+            query: input,
+            results_count: datasets.length
+          })
+        );
+      } else {
+        // Fallback to in-memory datasets
+        const datasetsResult = await getAllDatasets(env);
+        datasets = datasetsResult.data || [];
+      }
 
       // Enhanced dataset matching with NLP insights
       const inputLower = input.toLowerCase();
@@ -377,11 +407,44 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       });
 
       // ===================================================================
-      // Memory & Learning: Session tracking (Phase 2 will add persistent storage via D1)
+      // Memory & Learning: Session tracking with D1 Persistence!
       // ===================================================================
-      // NOTE: Currently in-memory only. Phase 2 will add D1 database for persistent memory.
-
       const processingTime = Date.now() - processingStart;
+
+      // Store conversation history and session data in D1
+      if (DatabaseService.isInitialized() && sessionId) {
+        ctx.waitUntil(
+          (async () => {
+            try {
+              // Create or update session
+              await DatabaseService.createOrUpdateSession(sessionId, {
+                ip: request.headers.get('cf-connecting-ip'),
+                user_agent: request.headers.get('user-agent'),
+                language: nlpAnalysis.primary_language,
+                dialect: nlpAnalysis.dialect
+              });
+
+              // Store reflexion history
+              await DatabaseService.storeReflexionHistory({
+                session_id: sessionId,
+                user_input: input,
+                ai_response: response,
+                metadata: {
+                  confidence: confidence,
+                  cultural_score: culturalScoring.overall_score,
+                  matched_dataset_id: matchedDataset?.id,
+                  language: nlpAnalysis.primary_language,
+                  emotion: emotionResult.primary_emotion,
+                  intent: analysis.intent,
+                  processing_time_ms: processingTime
+                }
+              });
+            } catch (error) {
+              console.error('Failed to store conversation history:', error);
+            }
+          })()
+        );
+      }
 
       return jsonResponse({
         success: true,
@@ -433,18 +496,30 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
 
           metadata: {
             processing_time_ms: processingTime,
-            model: 'reflexhon-v3.0.0-stable',
-            version_note: 'Phase 1 Complete - Phase 2 (D1 Database) in development',
+            model: DatabaseService.isInitialized() ? 'reflexhon-v3.0.0-data-layer' : 'reflexhon-v3.0.0-stable',
+            version_note: DatabaseService.isInitialized()
+              ? 'Phase 2A Active - D1 Database with 70 cultural datasets, FTS5 search, session tracking'
+              : 'Phase 1 Complete - Fallback to in-memory mode',
             layers_processed: 5,
-            features_active: [
+            database_active: DatabaseService.isInitialized(),
+            features_active: DatabaseService.isInitialized() ? [
+              '✓ 5-Layer Reflexion',
+              '✓ D1 Database (70 datasets)',
+              '✓ FTS5 Full-Text Search',
+              '✓ Session Tracking',
+              '✓ Conversation History',
+              '✓ Search Analytics',
+              '✓ Papiamentu NLP (basic)',
+              '✓ Emotion Detection (basic)',
+              '✓ Cultural Alignment'
+            ] : [
               '✓ 5-Layer Reflexion',
               '✓ Papiamentu NLP (basic)',
               '✓ Emotion Detection (basic)',
               '✓ Cultural Alignment',
-              '✓ Memory & Learning (in-memory)'
+              '✓ In-memory datasets'
             ],
-            features_coming_phase2: [
-              'D1 Database for persistent storage',
+            features_coming_phase2b: [
               'KV Caching for performance',
               'Advanced NLP with full dialect support',
               'Caribbean-calibrated emotion detection',
@@ -468,18 +543,32 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
   }
 
   // ===================================================================
-  // GET /api/v1/datasets - Get cultural datasets
+  // GET /api/v1/datasets - Get cultural datasets from D1
   // ===================================================================
   if (endpoint === '/datasets' && method === 'GET') {
     try {
-      // Load real datasets from datasets.js (18 cultural datasets)
-      const result = await getAllDatasets(env);
+      let datasets, total, source;
+
+      if (DatabaseService.isInitialized()) {
+        // Load from D1 database
+        const category = url.searchParams.get('category');
+        datasets = await DatabaseService.getAllDatasets(category ? { category } : {});
+        total = datasets.length;
+        source = 'D1 Database (persistent)';
+      } else {
+        // Fallback to in-memory
+        const result = await getAllDatasets(env);
+        datasets = result.data;
+        total = result.total;
+        source = 'In-memory (fallback)';
+      }
 
       return jsonResponse({
-        success: result.success,
-        data: result.data,
-        count: result.total,
-        metadata: result.metadata,
+        success: true,
+        data: datasets,
+        count: total,
+        source: source,
+        database_active: DatabaseService.isInitialized(),
         message: 'Cultural datasets retrieved'
       }, corsHeaders);
 
@@ -551,25 +640,35 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
   }
 
   // ===================================================================
-  // GET /api/v1/analytics - Get analytics data (simplified)
-  // Phase 2 will add D1 Database for persistent analytics storage
+  // GET /api/v1/analytics - Get analytics data from D1 Database!
   // ===================================================================
   if (endpoint === '/analytics' && method === 'GET') {
-    return jsonResponse({
-      success: true,
-      total_requests: 0,
-      unique_visitors: 0,
-      cache_hit_rate: 0,
-      avg_response_time_ms: 0,
-      note: 'In-memory analytics only. Full analytics dashboard coming in Phase 2 with D1 Database',
-      phase2_features: [
-        'Persistent request tracking',
-        'Visitor analytics',
-        'Performance metrics',
-        'Cultural insights',
-        'Language distribution'
-      ]
-    }, corsHeaders);
+    try {
+      if (!DatabaseService.isInitialized()) {
+        return jsonResponse({
+          success: false,
+          error: 'Database not initialized',
+          message: 'Analytics require D1 database connection',
+          note: 'Make sure env.DB is configured in wrangler.toml'
+        }, corsHeaders, 503);
+      }
+
+      const range = parseInt(url.searchParams.get('range')) || 24;
+      const analytics = await DatabaseService.getDashboardAnalytics(range);
+
+      return jsonResponse({
+        success: true,
+        ...analytics,
+        message: 'Real-time analytics from D1 database'
+      }, corsHeaders);
+
+    } catch (error) {
+      return jsonResponse({
+        success: false,
+        error: 'Analytics unavailable',
+        message: error.message
+      }, corsHeaders, 500);
+    }
   }
 
   // Unknown API endpoint
@@ -594,13 +693,26 @@ function jsonResponse(data, headers = {}, status = 200) {
 }
 
 /**
- * Helper: Track analytics (simplified - Phase 2 will add persistent storage)
+ * Helper: Track analytics to D1 Database
  */
-async function trackAnalytics(path, method, status, responseTime, ip) {
+async function trackAnalytics(path, method, status, responseTime, ip, userAgent, sessionId) {
   try {
-    // In-memory tracking only for now
-    // Phase 2 will add D1 database for persistent analytics
-    console.log(`[Analytics] ${method} ${path} - ${status} (${responseTime}ms)`);
+    if (DatabaseService.isInitialized()) {
+      // Log to D1 database
+      await DatabaseService.logAPIRequest({
+        session_id: sessionId || null,
+        endpoint: path,
+        method: method,
+        status_code: status,
+        response_time_ms: responseTime,
+        ip_address: ip,
+        user_agent: userAgent,
+        error_message: status >= 400 ? 'Error response' : null
+      });
+    } else {
+      // Fallback: log to console
+      console.log(`[Analytics] ${method} ${path} - ${status} (${responseTime}ms)`);
+    }
   } catch (error) {
     console.error('Analytics tracking error:', error);
   }

@@ -1,18 +1,21 @@
 /**
- * DatabaseService - D1 Database Interface
- * Phase 2: Data Layer Service
+ * DatabaseService - D1 Database Interface (Existing Schema)
+ * Integrated with existing reflexhon_global database
  *
- * Provides a clean interface for all database operations including:
- * - Cultural datasets management
- * - Session & conversation tracking
- * - User preferences & learning
- * - Analytics & logging
- * - Cultural alignment scoring
+ * Existing Tables:
+ * - cultural_datasets (70 entries with FTS5 full-text search)
+ * - reflexion_history (conversation history)
+ * - api_logs (request logging)
+ * - user_sessions (session tracking)
+ * - api_keys (API key management)
+ * - rate_limits (rate limiting)
+ * - cultural_feedback (user feedback)
+ * - search_analytics (search tracking)
  */
 
 class DatabaseService {
   constructor() {
-    this.db = null; // Will be set by initialize()
+    this.db = null;
   }
 
   /**
@@ -31,12 +34,12 @@ class DatabaseService {
   }
 
   // ================================================================
-  // CULTURAL DATASETS
+  // CULTURAL DATASETS - With FTS5 Full-Text Search
   // ================================================================
 
   /**
    * Get all cultural datasets
-   * @param {Object} filters - Optional filters (category, language, dialect)
+   * @param {Object} filters - Optional filters (category, language)
    * @returns {Promise<Array>} Array of datasets
    */
   async getAllDatasets(filters = {}) {
@@ -50,27 +53,19 @@ class DatabaseService {
       conditions.push('category = ?');
       params.push(filters.category);
     }
-    if (filters.language) {
-      conditions.push('language = ?');
-      params.push(filters.language);
-    }
-    if (filters.dialect) {
-      conditions.push('dialect = ?');
-      params.push(filters.dialect);
-    }
 
     if (conditions.length > 0) {
       query += ' WHERE ' + conditions.join(' AND ');
     }
 
-    query += ' ORDER BY relevance_score DESC, usage_count DESC';
+    query += ' ORDER BY id';
 
     const result = await this.db.prepare(query).bind(...params).all();
     return result.results || [];
   }
 
   /**
-   * Search datasets by input text
+   * Search datasets using FTS5 full-text search
    * @param {string} searchText - Text to search for
    * @param {number} limit - Maximum results (default 10)
    * @returns {Promise<Array>} Matching datasets
@@ -78,20 +73,35 @@ class DatabaseService {
   async searchDatasets(searchText, limit = 10) {
     if (!this.db) throw new Error('Database not initialized');
 
+    // Use FTS5 full-text search for better performance
     const result = await this.db.prepare(`
-      SELECT *,
-        CASE
-          WHEN LOWER(input) = LOWER(?) THEN 100
-          WHEN LOWER(input) LIKE '%' || LOWER(?) || '%' THEN 80
-          WHEN LOWER(output) LIKE '%' || LOWER(?) || '%' THEN 60
-          ELSE 40
-        END as match_score
-      FROM cultural_datasets
-      WHERE LOWER(input) LIKE '%' || LOWER(?) || '%'
-         OR LOWER(output) LIKE '%' || LOWER(?) || '%'
-      ORDER BY match_score DESC, relevance_score DESC, usage_count DESC
+      SELECT d.*, fts.rank
+      FROM cultural_datasets d
+      JOIN cultural_datasets_fts fts ON d.id = fts.id
+      WHERE cultural_datasets_fts MATCH ?
+      ORDER BY fts.rank
       LIMIT ?
-    `).bind(searchText, searchText, searchText, searchText, searchText, limit).all();
+    `).bind(searchText, limit).all();
+
+    // Fallback to LIKE search if FTS fails
+    if (!result.results || result.results.length === 0) {
+      const fallbackResult = await this.db.prepare(`
+        SELECT *,
+          CASE
+            WHEN LOWER(input) = LOWER(?) THEN 100
+            WHEN LOWER(input) LIKE '%' || LOWER(?) || '%' THEN 80
+            WHEN LOWER(output) LIKE '%' || LOWER(?) || '%' THEN 60
+            ELSE 40
+          END as match_score
+        FROM cultural_datasets
+        WHERE LOWER(input) LIKE '%' || LOWER(?) || '%'
+           OR LOWER(output) LIKE '%' || LOWER(?) || '%'
+        ORDER BY match_score DESC
+        LIMIT ?
+      `).bind(searchText, searchText, searchText, searchText, searchText, limit).all();
+
+      return fallbackResult.results || [];
+    }
 
     return result.results || [];
   }
@@ -112,169 +122,57 @@ class DatabaseService {
   }
 
   /**
-   * Create or update a cultural dataset
-   * @param {Object} dataset - Dataset object
-   * @returns {Promise<Object>} Created/updated dataset
+   * Get datasets by category
+   * @param {string} category - Category name
+   * @returns {Promise<Array>} Datasets in category
    */
-  async upsertDataset(dataset) {
+  async getDatasetsByCategory(category) {
     if (!this.db) throw new Error('Database not initialized');
 
-    await this.db.prepare(`
-      INSERT INTO cultural_datasets (
-        id, category, input, output, language, dialect,
-        cultural_context, keywords, relevance_score
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET
-        category = excluded.category,
-        input = excluded.input,
-        output = excluded.output,
-        language = excluded.language,
-        dialect = excluded.dialect,
-        cultural_context = excluded.cultural_context,
-        keywords = excluded.keywords,
-        relevance_score = excluded.relevance_score,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      dataset.id,
-      dataset.category,
-      dataset.input,
-      dataset.output,
-      dataset.language || 'papiamentu',
-      dataset.dialect || null,
-      dataset.cultural_context || null,
-      JSON.stringify(dataset.keywords || []),
-      dataset.relevance_score || 1.0
-    ).run();
+    const result = await this.db.prepare(
+      'SELECT * FROM cultural_datasets WHERE category = ? ORDER BY id'
+    ).bind(category).all();
 
-    return await this.getDatasetById(dataset.id);
-  }
-
-  /**
-   * Track dataset usage
-   * @param {string} datasetId - Dataset ID
-   * @param {string} sessionId - Session ID
-   * @param {number} matchScore - Match score (0-100)
-   * @param {string} context - User query context
-   */
-  async trackDatasetUsage(datasetId, sessionId, matchScore, context) {
-    if (!this.db) throw new Error('Database not initialized');
-
-    await this.db.prepare(`
-      INSERT INTO dataset_usage_stats (dataset_id, session_id, match_score, context)
-      VALUES (?, ?, ?, ?)
-    `).bind(datasetId, sessionId, matchScore, context).run();
+    return result.results || [];
   }
 
   // ================================================================
-  // SESSIONS
+  // REFLEXION HISTORY - Conversation Tracking
   // ================================================================
 
   /**
-   * Create or get session
-   * @param {string} sessionId - Session ID
-   * @param {Object} metadata - Session metadata (ip, user_agent, etc.)
-   * @returns {Promise<Object>} Session object
+   * Store reflexion history entry
+   * @param {Object} entry - History entry
+   * @returns {Promise<number>} Entry ID
    */
-  async createOrGetSession(sessionId, metadata = {}) {
-    if (!this.db) throw new Error('Database not initialized');
-
-    // Try to get existing session
-    let session = await this.db.prepare(
-      'SELECT * FROM sessions WHERE session_id = ?'
-    ).bind(sessionId).first();
-
-    if (session) {
-      // Update last activity
-      await this.db.prepare(`
-        UPDATE sessions
-        SET last_activity_at = CURRENT_TIMESTAMP
-        WHERE session_id = ?
-      `).bind(sessionId).run();
-
-      return session;
-    }
-
-    // Create new session
-    await this.db.prepare(`
-      INSERT INTO sessions (
-        session_id, ip_address, user_agent, language_preference,
-        dialect_preference, metadata
-      ) VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(
-      sessionId,
-      metadata.ip || null,
-      metadata.user_agent || null,
-      metadata.language_preference || 'papiamentu',
-      metadata.dialect_preference || null,
-      JSON.stringify(metadata)
-    ).run();
-
-    return await this.db.prepare(
-      'SELECT * FROM sessions WHERE session_id = ?'
-    ).bind(sessionId).first();
-  }
-
-  /**
-   * Get session statistics
-   * @param {string} sessionId - Session ID
-   * @returns {Promise<Object>} Session stats
-   */
-  async getSessionStats(sessionId) {
+  async storeReflexionHistory(entry) {
     if (!this.db) throw new Error('Database not initialized');
 
     const result = await this.db.prepare(`
-      SELECT * FROM v_session_quality WHERE session_id = ?
-    `).bind(sessionId).first();
-
-    return result;
-  }
-
-  // ================================================================
-  // CONVERSATION MESSAGES
-  // ================================================================
-
-  /**
-   * Store a conversation message
-   * @param {string} sessionId - Session ID
-   * @param {Object} message - Message object
-   * @returns {Promise<number>} Message ID
-   */
-  async storeMessage(sessionId, message) {
-    if (!this.db) throw new Error('Database not initialized');
-
-    const result = await this.db.prepare(`
-      INSERT INTO conversation_messages (
-        session_id, role, content, language, dialect, emotion, intent,
-        confidence, cultural_score, matched_dataset_id, processing_time_ms
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO reflexion_history (
+        session_id, user_input, ai_response, metadata, created_at
+      ) VALUES (?, ?, ?, ?, datetime('now'))
     `).bind(
-      sessionId,
-      message.role,
-      message.content,
-      message.language || null,
-      message.dialect || null,
-      message.emotion || null,
-      message.intent || null,
-      message.confidence || null,
-      message.cultural_score || null,
-      message.matched_dataset_id || null,
-      message.processing_time_ms || null
+      entry.session_id || null,
+      entry.user_input,
+      entry.ai_response,
+      JSON.stringify(entry.metadata || {}),
     ).run();
 
     return result.meta.last_row_id;
   }
 
   /**
-   * Get conversation history for a session
+   * Get reflexion history for a session
    * @param {string} sessionId - Session ID
-   * @param {number} limit - Maximum messages to retrieve
-   * @returns {Promise<Array>} Array of messages
+   * @param {number} limit - Maximum entries (default 50)
+   * @returns {Promise<Array>} History entries
    */
-  async getConversationHistory(sessionId, limit = 50) {
+  async getReflexionHistory(sessionId, limit = 50) {
     if (!this.db) throw new Error('Database not initialized');
 
     const result = await this.db.prepare(`
-      SELECT * FROM conversation_messages
+      SELECT * FROM reflexion_history
       WHERE session_id = ?
       ORDER BY created_at DESC
       LIMIT ?
@@ -283,228 +181,291 @@ class DatabaseService {
     return (result.results || []).reverse(); // Oldest first
   }
 
-  // ================================================================
-  // USER PREFERENCES & LEARNING
-  // ================================================================
-
   /**
-   * Store or update a user preference
-   * @param {string} sessionId - Session ID
-   * @param {string} key - Preference key
-   * @param {string} value - Preference value
-   * @param {Object} options - Additional options (confidence, learned_from)
+   * Get all reflexion history (for analytics)
+   * @param {number} hours - Last N hours (default 24)
+   * @returns {Promise<Array>} History entries
    */
-  async setPreference(sessionId, key, value, options = {}) {
-    if (!this.db) throw new Error('Database not initialized');
-
-    await this.db.prepare(`
-      INSERT INTO user_preferences (
-        session_id, preference_key, preference_value, confidence, learned_from
-      ) VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(session_id, preference_key) DO UPDATE SET
-        preference_value = excluded.preference_value,
-        confidence = excluded.confidence,
-        occurrence_count = occurrence_count + 1,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      sessionId,
-      key,
-      value,
-      options.confidence || 0.5,
-      options.learned_from || 'implicit'
-    ).run();
-  }
-
-  /**
-   * Get all preferences for a session
-   * @param {string} sessionId - Session ID
-   * @returns {Promise<Object>} Preferences object
-   */
-  async getPreferences(sessionId) {
+  async getRecentReflexionHistory(hours = 24) {
     if (!this.db) throw new Error('Database not initialized');
 
     const result = await this.db.prepare(`
-      SELECT preference_key, preference_value, confidence
-      FROM user_preferences
-      WHERE session_id = ?
-    `).bind(sessionId).all();
+      SELECT * FROM reflexion_history
+      WHERE created_at >= datetime('now', '-' || ? || ' hours')
+      ORDER BY created_at DESC
+    `).bind(hours).all();
 
-    const preferences = {};
-    (result.results || []).forEach(pref => {
-      preferences[pref.preference_key] = {
-        value: pref.preference_value,
-        confidence: pref.confidence
-      };
-    });
-
-    return preferences;
+    return result.results || [];
   }
 
   // ================================================================
-  // ANALYTICS & LOGGING
+  // USER SESSIONS - Session Management
   // ================================================================
 
   /**
-   * Log an API request
-   * @param {Object} requestData - Request data
+   * Create or update session
+   * @param {string} sessionId - Session ID
+   * @param {Object} metadata - Session metadata
+   * @returns {Promise<Object>} Session object
    */
-  async logRequest(requestData) {
+  async createOrUpdateSession(sessionId, metadata = {}) {
+    if (!this.db) throw new Error('Database not initialized');
+
+    // Try to get existing session
+    let session = await this.db.prepare(
+      'SELECT * FROM user_sessions WHERE session_id = ?'
+    ).bind(sessionId).first();
+
+    if (session) {
+      // Update existing session
+      await this.db.prepare(`
+        UPDATE user_sessions
+        SET last_activity = datetime('now'),
+            metadata = ?
+        WHERE session_id = ?
+      `).bind(JSON.stringify(metadata), sessionId).run();
+    } else {
+      // Create new session
+      await this.db.prepare(`
+        INSERT INTO user_sessions (session_id, metadata, created_at, last_activity)
+        VALUES (?, ?, datetime('now'), datetime('now'))
+      `).bind(sessionId, JSON.stringify(metadata)).run();
+    }
+
+    return await this.db.prepare(
+      'SELECT * FROM user_sessions WHERE session_id = ?'
+    ).bind(sessionId).first();
+  }
+
+  /**
+   * Get session by ID
+   * @param {string} sessionId - Session ID
+   * @returns {Promise<Object|null>} Session or null
+   */
+  async getSession(sessionId) {
+    if (!this.db) throw new Error('Database not initialized');
+
+    return await this.db.prepare(
+      'SELECT * FROM user_sessions WHERE session_id = ?'
+    ).bind(sessionId).first();
+  }
+
+  /**
+   * Get active sessions count
+   * @param {number} hours - Consider active if activity within N hours (default 24)
+   * @returns {Promise<number>} Active session count
+   */
+  async getActiveSessionsCount(hours = 24) {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.prepare(`
+      SELECT COUNT(*) as count FROM user_sessions
+      WHERE last_activity >= datetime('now', '-' || ? || ' hours')
+    `).bind(hours).first();
+
+    return result?.count || 0;
+  }
+
+  // ================================================================
+  // API LOGS - Request Tracking
+  // ================================================================
+
+  /**
+   * Log API request
+   * @param {Object} logEntry - Log entry data
+   */
+  async logAPIRequest(logEntry) {
     if (!this.db) throw new Error('Database not initialized');
 
     await this.db.prepare(`
-      INSERT INTO analytics_requests (
-        session_id, path, method, status_code, response_time_ms,
-        ip_address, user_agent, language, error_message
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO api_logs (
+        session_id, endpoint, method, status_code, response_time_ms,
+        ip_address, user_agent, error_message, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `).bind(
-      requestData.session_id || null,
-      requestData.path,
-      requestData.method,
-      requestData.status_code,
-      requestData.response_time_ms || null,
-      requestData.ip_address || null,
-      requestData.user_agent || null,
-      requestData.language || null,
-      requestData.error_message || null
+      logEntry.session_id || null,
+      logEntry.endpoint,
+      logEntry.method,
+      logEntry.status_code,
+      logEntry.response_time_ms || null,
+      logEntry.ip_address || null,
+      logEntry.user_agent || null,
+      logEntry.error_message || null
     ).run();
   }
 
   /**
-   * Get analytics data
-   * @param {Object} options - Query options (range, groupBy, etc.)
-   * @returns {Promise<Object>} Analytics data
+   * Get API logs
+   * @param {Object} options - Query options
+   * @returns {Promise<Array>} Log entries
    */
-  async getAnalytics(options = {}) {
+  async getAPILogs(options = {}) {
     if (!this.db) throw new Error('Database not initialized');
 
-    const range = options.range || 24; // hours
+    const hours = options.hours || 24;
+    const limit = options.limit || 100;
 
-    // Get basic stats
+    const result = await this.db.prepare(`
+      SELECT * FROM api_logs
+      WHERE created_at >= datetime('now', '-' || ? || ' hours')
+      ORDER BY created_at DESC
+      LIMIT ?
+    `).bind(hours, limit).all();
+
+    return result.results || [];
+  }
+
+  /**
+   * Get API analytics
+   * @param {number} hours - Time range in hours
+   * @returns {Promise<Object>} Analytics data
+   */
+  async getAPIAnalytics(hours = 24) {
+    if (!this.db) throw new Error('Database not initialized');
+
     const stats = await this.db.prepare(`
       SELECT
         COUNT(*) as total_requests,
         COUNT(DISTINCT session_id) as unique_sessions,
         COUNT(DISTINCT ip_address) as unique_visitors,
         AVG(response_time_ms) as avg_response_time,
-        SUM(CASE WHEN status_code = 200 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as success_rate
-      FROM analytics_requests
+        SUM(CASE WHEN status_code = 200 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as success_rate,
+        SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count
+      FROM api_logs
       WHERE created_at >= datetime('now', '-' || ? || ' hours')
-    `).bind(range).first();
+    `).bind(hours).first();
 
-    // Get daily stats
-    const dailyStats = await this.db.prepare(`
-      SELECT * FROM v_daily_stats
-      ORDER BY date DESC
-      LIMIT 30
-    `).all();
-
-    // Get popular datasets
-    const popularDatasets = await this.db.prepare(`
-      SELECT * FROM v_popular_datasets
-      LIMIT 10
-    `).all();
-
-    return {
-      current_stats: stats,
-      daily_breakdown: dailyStats.results || [],
-      popular_datasets: popularDatasets.results || []
+    return stats || {
+      total_requests: 0,
+      unique_sessions: 0,
+      unique_visitors: 0,
+      avg_response_time: 0,
+      success_rate: 100,
+      error_count: 0
     };
   }
 
   // ================================================================
-  // CULTURAL ALIGNMENT SCORING
+  // SEARCH ANALYTICS - Track Search Patterns
   // ================================================================
 
   /**
-   * Store cultural alignment score
-   * @param {number} messageId - Message ID
-   * @param {Object} scores - Scoring data
+   * Track search query
+   * @param {Object} searchData - Search tracking data
    */
-  async storeCulturalScore(messageId, scores) {
+  async trackSearch(searchData) {
     if (!this.db) throw new Error('Database not initialized');
 
     await this.db.prepare(`
-      INSERT INTO cultural_alignment_scores (
-        message_id, overall_score, quality_grade,
-        language_appropriateness, cultural_sensitivity, contextual_relevance,
-        respectfulness, empathy_level, warmth_factor, dialect_accuracy,
-        code_switching_quality, cultural_context_depth, authenticity,
-        strengths, recommendations
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO search_analytics (
+        session_id, query, results_count, clicked_result_id, created_at
+      ) VALUES (?, ?, ?, ?, datetime('now'))
     `).bind(
-      messageId,
-      scores.overall_score,
-      scores.quality_grade,
-      scores.dimension_scores?.language_appropriateness || 0,
-      scores.dimension_scores?.cultural_sensitivity || 0,
-      scores.dimension_scores?.contextual_relevance || 0,
-      scores.dimension_scores?.respectfulness || 0,
-      scores.dimension_scores?.empathy_level || 0,
-      scores.dimension_scores?.warmth_factor || 0,
-      scores.dimension_scores?.dialect_accuracy || 0,
-      scores.dimension_scores?.code_switching_quality || 0,
-      scores.dimension_scores?.cultural_context_depth || 0,
-      scores.dimension_scores?.authenticity || 0,
-      JSON.stringify(scores.strengths || []),
-      JSON.stringify(scores.recommendations || [])
+      searchData.session_id || null,
+      searchData.query,
+      searchData.results_count || 0,
+      searchData.clicked_result_id || null
     ).run();
   }
 
   /**
-   * Get average cultural scores over time
-   * @param {number} days - Number of days to analyze
-   * @returns {Promise<Object>} Average scores
+   * Get popular search queries
+   * @param {number} limit - Maximum results (default 10)
+   * @returns {Promise<Array>} Popular queries
    */
-  async getCulturalScoreTrends(days = 7) {
+  async getPopularSearches(limit = 10) {
     if (!this.db) throw new Error('Database not initialized');
 
     const result = await this.db.prepare(`
-      SELECT
-        DATE(cas.created_at) as date,
-        AVG(cas.overall_score) as avg_overall_score,
-        AVG(cas.language_appropriateness) as avg_language,
-        AVG(cas.cultural_sensitivity) as avg_cultural_sensitivity,
-        AVG(cas.warmth_factor) as avg_warmth,
-        COUNT(*) as sample_size
-      FROM cultural_alignment_scores cas
-      WHERE cas.created_at >= datetime('now', '-' || ? || ' days')
-      GROUP BY DATE(cas.created_at)
-      ORDER BY date DESC
-    `).bind(days).all();
+      SELECT query, COUNT(*) as search_count
+      FROM search_analytics
+      WHERE created_at >= datetime('now', '-7 days')
+      GROUP BY query
+      ORDER BY search_count DESC
+      LIMIT ?
+    `).bind(limit).all();
 
     return result.results || [];
   }
 
   // ================================================================
-  // UTILITY METHODS
+  // CULTURAL FEEDBACK - User Feedback Collection
   // ================================================================
 
   /**
-   * Execute a raw SQL query (for migrations, admin tasks)
-   * @param {string} sql - SQL query
-   * @param {Array} params - Query parameters
-   * @returns {Promise<Object>} Query result
+   * Store user feedback
+   * @param {Object} feedback - Feedback data
    */
-  async executeRaw(sql, params = []) {
+  async storeFeedback(feedback) {
     if (!this.db) throw new Error('Database not initialized');
 
-    return await this.db.prepare(sql).bind(...params).run();
+    await this.db.prepare(`
+      INSERT INTO cultural_feedback (
+        session_id, reflexion_id, rating, feedback_text, created_at
+      ) VALUES (?, ?, ?, ?, datetime('now'))
+    `).bind(
+      feedback.session_id || null,
+      feedback.reflexion_id || null,
+      feedback.rating,
+      feedback.feedback_text || null
+    ).run();
   }
 
   /**
-   * Execute a batch of statements
-   * @param {Array<Object>} statements - Array of {sql, params}
-   * @returns {Promise<Array>} Results
+   * Get average feedback rating
+   * @param {number} days - Time range in days (default 7)
+   * @returns {Promise<Object>} Feedback stats
    */
-  async executeBatch(statements) {
+  async getFeedbackStats(days = 7) {
     if (!this.db) throw new Error('Database not initialized');
 
-    const batch = statements.map(stmt =>
-      this.db.prepare(stmt.sql).bind(...(stmt.params || []))
-    );
+    const stats = await this.db.prepare(`
+      SELECT
+        AVG(rating) as avg_rating,
+        COUNT(*) as total_feedback,
+        SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as positive_rate
+      FROM cultural_feedback
+      WHERE created_at >= datetime('now', '-' || ? || ' days')
+    `).bind(days).first();
 
-    return await this.db.batch(batch);
+    return stats || {
+      avg_rating: 0,
+      total_feedback: 0,
+      positive_rate: 0
+    };
   }
+
+  // ================================================================
+  // COMPREHENSIVE ANALYTICS
+  // ================================================================
+
+  /**
+   * Get complete dashboard analytics
+   * @param {number} hours - Time range in hours
+   * @returns {Promise<Object>} Complete analytics
+   */
+  async getDashboardAnalytics(hours = 24) {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const [apiStats, feedbackStats, activeSessions, popularSearches] = await Promise.all([
+      this.getAPIAnalytics(hours),
+      this.getFeedbackStats(Math.ceil(hours / 24)),
+      this.getActiveSessionsCount(hours),
+      this.getPopularSearches(5)
+    ]);
+
+    return {
+      api: apiStats,
+      feedback: feedbackStats,
+      active_sessions: activeSessions,
+      popular_searches: popularSearches,
+      time_range_hours: hours
+    };
+  }
+
+  // ================================================================
+  // DATABASE UTILITIES
+  // ================================================================
 
   /**
    * Get database statistics
@@ -513,24 +474,34 @@ class DatabaseService {
   async getDatabaseStats() {
     if (!this.db) throw new Error('Database not initialized');
 
-    const stats = {};
-
-    // Count records in each table
     const tables = [
       'cultural_datasets',
-      'sessions',
-      'conversation_messages',
-      'user_preferences',
-      'analytics_requests',
-      'cultural_alignment_scores'
+      'reflexion_history',
+      'api_logs',
+      'user_sessions',
+      'cultural_feedback',
+      'search_analytics'
     ];
+
+    const stats = {};
 
     for (const table of tables) {
       const result = await this.db.prepare(`SELECT COUNT(*) as count FROM ${table}`).first();
-      stats[table] = result.count;
+      stats[table] = result?.count || 0;
     }
 
     return stats;
+  }
+
+  /**
+   * Execute raw SQL query (admin only)
+   * @param {string} sql - SQL query
+   * @param {Array} params - Query parameters
+   * @returns {Promise<Object>} Query result
+   */
+  async executeRaw(sql, params = []) {
+    if (!this.db) throw new Error('Database not initialized');
+    return await this.db.prepare(sql).bind(...params).all();
   }
 }
 
