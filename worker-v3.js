@@ -137,7 +137,7 @@ export default {
       // =================================================================
 
       if (path.startsWith('/api/v1/')) {
-        return await handleAPIv1(path, method, request, env, corsHeaders, startTime, ctx);
+        return await handleAPIv1(path, method, request, env, corsHeaders, startTime, ctx, url);
       }
 
       // =================================================================
@@ -252,7 +252,7 @@ export default {
 /**
  * Handle API v1 routes
  */
-async function handleAPIv1(path, method, request, env, corsHeaders, startTime, ctx) {
+async function handleAPIv1(path, method, request, env, corsHeaders, startTime, ctx, url) {
   const endpoint = path.replace('/api/v1', '');
 
   // ===================================================================

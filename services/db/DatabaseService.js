@@ -73,37 +73,43 @@ class DatabaseService {
   async searchDatasets(searchText, limit = 10) {
     if (!this.db) throw new Error('Database not initialized');
 
-    // Use FTS5 full-text search for better performance
-    const result = await this.db.prepare(`
-      SELECT d.*, fts.rank
-      FROM cultural_datasets d
-      JOIN cultural_datasets_fts fts ON d.id = fts.id
-      WHERE cultural_datasets_fts MATCH ?
-      ORDER BY fts.rank
-      LIMIT ?
-    `).bind(searchText, limit).all();
+    // Try FTS5 search first (if available)
+    try {
+      const ftsResult = await this.db.prepare(`
+        SELECT d.*
+        FROM cultural_datasets d
+        WHERE d.id IN (
+          SELECT id FROM cultural_datasets_fts
+          WHERE cultural_datasets_fts MATCH ?
+          LIMIT ?
+        )
+      `).bind(searchText, limit).all();
 
-    // Fallback to LIKE search if FTS fails
-    if (!result.results || result.results.length === 0) {
-      const fallbackResult = await this.db.prepare(`
-        SELECT *,
-          CASE
-            WHEN LOWER(input) = LOWER(?) THEN 100
-            WHEN LOWER(input) LIKE '%' || LOWER(?) || '%' THEN 80
-            WHEN LOWER(output) LIKE '%' || LOWER(?) || '%' THEN 60
-            ELSE 40
-          END as match_score
-        FROM cultural_datasets
-        WHERE LOWER(input) LIKE '%' || LOWER(?) || '%'
-           OR LOWER(output) LIKE '%' || LOWER(?) || '%'
-        ORDER BY match_score DESC
-        LIMIT ?
-      `).bind(searchText, searchText, searchText, searchText, searchText, limit).all();
-
-      return fallbackResult.results || [];
+      if (ftsResult.results && ftsResult.results.length > 0) {
+        return ftsResult.results;
+      }
+    } catch (ftsError) {
+      // FTS5 failed, fall through to LIKE search
+      console.log('FTS5 search failed, using LIKE fallback:', ftsError.message);
     }
 
-    return result.results || [];
+    // Fallback to LIKE search (always works)
+    const fallbackResult = await this.db.prepare(`
+      SELECT *,
+        CASE
+          WHEN LOWER(input) = LOWER(?) THEN 100
+          WHEN LOWER(input) LIKE '%' || LOWER(?) || '%' THEN 80
+          WHEN LOWER(output) LIKE '%' || LOWER(?) || '%' THEN 60
+          ELSE 40
+        END as match_score
+      FROM cultural_datasets
+      WHERE LOWER(input) LIKE '%' || LOWER(?) || '%'
+         OR LOWER(output) LIKE '%' || LOWER(?) || '%'
+      ORDER BY match_score DESC
+      LIMIT ?
+    `).bind(searchText, searchText, searchText, searchText, searchText, limit).all();
+
+    return fallbackResult.results || [];
   }
 
   /**
