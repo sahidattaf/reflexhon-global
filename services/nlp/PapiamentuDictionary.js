@@ -97,7 +97,7 @@ class PapiamentuDictionary {
         dia: { english: 'day', category: 'time', usage: 'high' },
         anochi: { english: 'night', category: 'time', usage: 'high' },
         aña: { english: 'year', category: 'time', usage: 'high' },
-        luna: { english: 'month', category: 'time', usage: 'medium' },
+        mes: { english: 'month', category: 'time', usage: 'medium' },
         siman: { english: 'week', category: 'time', usage: 'medium' },
         komida: { english: 'food', category: 'food', usage: 'high' },
         awa: { english: 'water', category: 'drink', usage: 'high' },

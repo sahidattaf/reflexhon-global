@@ -1,5 +1,3 @@
-import { logger } from '../../utils/logger.js';
-
 /**
  * Reasoning Cache Service
  *
@@ -21,8 +19,8 @@ class ReasoningCache {
       evictions: 0
     };
 
-    // Start cleanup interval
-    this._startCleanupInterval();
+    // Note: Cleanup happens lazily during get/set operations
+    // setInterval is not allowed in Cloudflare Workers global scope
   }
 
   /**
@@ -37,7 +35,6 @@ class ReasoningCache {
 
       if (!entry) {
         this.stats.misses++;
-        logger.debug('Cache miss', { key });
         return null;
       }
 
@@ -45,15 +42,13 @@ class ReasoningCache {
       if (Date.now() > entry.expiresAt) {
         this.cache.delete(key);
         this.stats.misses++;
-        logger.debug('Cache expired', { key });
         return null;
       }
 
       this.stats.hits++;
-      logger.debug('Cache hit', { key, age_ms: Date.now() - entry.timestamp });
       return entry.value;
     } catch (error) {
-      logger.error('Cache get error', { key, error });
+      console.error('Cache get error:', key, error);
       return null;
     }
   }
@@ -84,15 +79,9 @@ class ReasoningCache {
       this.cache.set(key, entry);
       this.stats.sets++;
 
-      logger.debug('Cache set', {
-        key,
-        ttl_hours: ttl / (60 * 60 * 1000),
-        cache_size: this.cache.size
-      });
-
       return true;
     } catch (error) {
-      logger.error('Cache set error', { key, error });
+      console.error('Cache set error:', key, error);
       return false;
     }
   }
@@ -107,11 +96,11 @@ class ReasoningCache {
     try {
       const deleted = this.cache.delete(key);
       if (deleted) {
-        logger.debug('Cache delete', { key });
+        // Cache delete successful
       }
       return deleted;
     } catch (error) {
-      logger.error('Cache delete error', { key, error });
+      console.error('Cache delete error:', key, error);
       return false;
     }
   }
@@ -124,10 +113,10 @@ class ReasoningCache {
   async clear() {
     try {
       this.cache.clear();
-      logger.info('Cache cleared');
+      console.log('Cache cleared');
       return true;
     } catch (error) {
-      logger.error('Cache clear error', error);
+      console.error('Cache clear error:', error);
       return false;
     }
   }
@@ -160,7 +149,7 @@ class ReasoningCache {
       sets: 0,
       evictions: 0
     };
-    logger.info('Cache stats reset');
+    console.log('Cache stats reset');
   }
 
   /**
@@ -169,7 +158,7 @@ class ReasoningCache {
    * Pre-warms cache with frequently asked questions
    */
   async warmupCache() {
-    logger.info('Warming up cache with common patterns...');
+    console.log('Warming up cache with common patterns...');
 
     const commonPatterns = [
       {
@@ -210,7 +199,7 @@ class ReasoningCache {
       await this.set(pattern.key, pattern.response, this.ttl);
     }
 
-    logger.info(`Cache warmed up with ${commonPatterns.length} patterns`);
+    console.log(`Cache warmed up with ${commonPatterns.length} patterns`);
   }
 
   /**
@@ -251,18 +240,18 @@ class ReasoningCache {
     if (oldestKey) {
       this.cache.delete(oldestKey);
       this.stats.evictions++;
-      logger.debug('Cache eviction', { key: oldestKey });
+      // Cache eviction (old key removed)
     }
   }
 
   /**
    * Start periodic cleanup of expired entries
+   * NOTE: Disabled for Cloudflare Workers - setInterval not allowed in global scope
+   * Cleanup happens lazily during get() operations instead
    */
   _startCleanupInterval() {
-    // Run cleanup every 5 minutes
-    setInterval(() => {
-      this._cleanupExpired();
-    }, 5 * 60 * 1000);
+    // Disabled - setInterval not allowed in Cloudflare Workers
+    // Cleanup happens automatically during get() when checking expiration
   }
 
   /**
@@ -280,7 +269,7 @@ class ReasoningCache {
     }
 
     if (cleaned > 0) {
-      logger.debug('Cache cleanup', { expired_entries: cleaned });
+      console.log(`Cache cleanup: ${cleaned} expired entries removed`);
     }
   }
 

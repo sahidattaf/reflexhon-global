@@ -332,7 +332,31 @@
       padding-top: 2rem;
       border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
+
+    /* Embedded Mode - Hide header when inside iframe */
+    body.embedded .header {
+      display: none !important;
+    }
+
+    body.embedded {
+      background: transparent;
+      min-height: auto;
+    }
+
+    body.embedded .container {
+      padding: 0;
+      margin: 0;
+      max-width: 100%;
+    }
   </style>
+  <script>
+    // Detect if page is embedded in an iframe
+    if (window.self !== window.top) {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('embedded');
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="header">

@@ -4,8 +4,6 @@
  * Tracks and reports API usage statistics for the Live Analytics Dashboard
  */
 
-import { logger } from '../utils/logger.js';
-
 class AnalyticsService {
   constructor() {
     // In-memory analytics storage
@@ -18,8 +16,8 @@ class AnalyticsService {
       cacheMisses: 0
     };
 
-    // Start cleanup interval (every hour)
-    this.startCleanup();
+    // Note: Cleanup disabled for Cloudflare Workers (setInterval not allowed)
+    // Analytics are ephemeral in Workers environment anyway
   }
 
   /**
@@ -74,7 +72,7 @@ class AnalyticsService {
         this.analytics.cacheMisses++;
       }
 
-      logger.info('Analytics tracked', {
+      console.log('Analytics tracked:', {
         path,
         status,
         responseTime: `${responseTime}ms`,
@@ -82,7 +80,7 @@ class AnalyticsService {
       });
 
     } catch (error) {
-      logger.error('Failed to track analytics', { error: error.message });
+      console.error('Failed to track analytics:', error.message);
     }
   }
 
@@ -226,20 +224,12 @@ class AnalyticsService {
 
   /**
    * Clear old analytics data (keep last 7 days)
+   * NOTE: Disabled for Cloudflare Workers - setInterval not allowed in global scope
+   * Workers are stateless and ephemeral, so cleanup is not needed
    */
   startCleanup() {
-    setInterval(() => {
-      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-
-      // Remove old requests
-      this.analytics.requests = this.analytics.requests.filter(
-        req => req.timestamp >= sevenDaysAgo
-      );
-
-      logger.info('Analytics cleanup completed', {
-        requests_remaining: this.analytics.requests.length
-      });
-    }, 60 * 60 * 1000); // Run every hour
+    // Disabled - setInterval not allowed in Cloudflare Workers
+    // Analytics are ephemeral in Workers environment (instance lifetime < 30s typically)
   }
 
   /**
@@ -255,7 +245,7 @@ class AnalyticsService {
       cacheMisses: 0
     };
 
-    logger.info('Analytics reset');
+    console.log('Analytics reset');
   }
 
   /**
