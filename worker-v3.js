@@ -11,18 +11,27 @@
  */
 
 // Import v3.0.0 Services
-// Phase 2: D1 Database Integration Active!
-// Current version: v3.0.0-data-layer
+// Phase 2: D1 Database Integration ✅ COMPLETE
+// Phase 3: Intelligence Enhancement ⚡ ACTIVE
+// Current version: v3.0.0-intelligence
 
 import ReflexionEngine from './services/reflexion/ReflexionEngine.js';
 import DatabaseService from './services/db/DatabaseService.js';
 import { getAllDatasets } from './datasets.js';
 
-// Advanced services (Phase 3) - Will be integrated after Phase 2 completion
-// - PapiamentuNLP (language detection, tokenization, dialect identification)
-// - EmotionAnalyzer (Caribbean-calibrated emotion detection)
-// - CulturalAlignmentScorer (10-dimension cultural analysis)
-// - ConversationMemory (session tracking, learning)
+// Phase 3: Advanced Intelligence Services - NOW ACTIVE!
+import PapiamentuNLP from './services/nlp/PapiamentuNLP.js';
+import EmotionAnalyzer from './services/emotion/EmotionAnalyzer.js';
+import CulturalAlignmentScorer from './services/memory/CulturalAlignmentScorer.js';
+import ConversationMemory from './services/memory/ConversationMemory.js';
+import SessionManager from './services/memory/SessionManager.js';
+
+// Initialize Phase 3 services (singletons)
+const papiamentuNLP = new PapiamentuNLP();
+const emotionAnalyzer = new EmotionAnalyzer();
+const culturalScorer = new CulturalAlignmentScorer();
+const conversationMemory = new ConversationMemory();
+const sessionManager = new SessionManager();
 
 /**
  * Cloudflare Workers Fetch Handler
@@ -273,14 +282,14 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       const processingStart = Date.now();
 
       // ===================================================================
-      // LAYER 1: Basic NLP Analysis (simplified - Phase 2 will integrate full PapiamentuNLP)
+      // LAYER 1: Advanced Papiamentu NLP Analysis (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const nlpAnalysis = analyzeLanguage(input);
+      const nlpAnalysis = await papiamentuNLP.analyzeText(input);
 
       // ===================================================================
-      // LAYER 2: Basic Emotion Detection (simplified - Phase 2 will integrate full EmotionAnalyzer)
+      // LAYER 2: Caribbean-Calibrated Emotion Detection (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const emotionResult = detectEmotion(input);
+      const emotionResult = await emotionAnalyzer.analyzeEmotion(input, nlpAnalysis);
 
       // ===================================================================
       // LAYER 3: Reflexion Engine - Intent & Entity Analysis
@@ -396,14 +405,19 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       }
 
       // ===================================================================
-      // LAYER 5: Cultural Alignment Scoring (simplified - Phase 2 will integrate full CulturalAlignmentScorer)
+      // LAYER 5: 10-Dimension Cultural Alignment Scoring (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const culturalScoring = scoreCulturalAlignment(response, {
+      const culturalScoring = await culturalScorer.scoreResponse({
+        response: response,
         input_language: nlpAnalysis.primary_language,
         dialect: nlpAnalysis.dialect,
         emotion_context: emotionResult.primary_emotion,
-        cultural_markers_present: nlpAnalysis.cultural_markers?.length > 0,
-        has_papiamentu: nlpAnalysis.primary_language === 'papiamentu'
+        cultural_markers: nlpAnalysis.cultural_markers || [],
+        tokens: nlpAnalysis.tokens || [],
+        conversation_context: {
+          user_input: input,
+          matched_dataset: matchedDataset?.id || null
+        }
       });
 
       // ===================================================================
@@ -496,34 +510,36 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
 
           metadata: {
             processing_time_ms: processingTime,
-            model: DatabaseService.isInitialized() ? 'reflexhon-v3.0.0-data-layer' : 'reflexhon-v3.0.0-stable',
+            model: DatabaseService.isInitialized() ? 'reflexhon-v3.0.0-intelligence' : 'reflexhon-v3.0.0-stable',
             version_note: DatabaseService.isInitialized()
-              ? 'Phase 2A Active - D1 Database with 70 cultural datasets, FTS5 search, session tracking'
+              ? 'Phase 2 & 3 Complete! - D1 Database + Full Intelligence Suite'
               : 'Phase 1 Complete - Fallback to in-memory mode',
             layers_processed: 5,
             database_active: DatabaseService.isInitialized(),
             features_active: DatabaseService.isInitialized() ? [
-              '✓ 5-Layer Reflexion',
+              '✓ 5-Layer Reflexion Engine',
               '✓ D1 Database (70 datasets)',
               '✓ FTS5 Full-Text Search',
-              '✓ Session Tracking',
+              '✓ Advanced Papiamentu NLP (3 dialects)',
+              '✓ Caribbean-Calibrated Emotion Detection',
+              '✓ 10-Dimension Cultural Alignment',
+              '✓ Session Tracking & Memory',
               '✓ Conversation History',
               '✓ Search Analytics',
-              '✓ Papiamentu NLP (basic)',
-              '✓ Emotion Detection (basic)',
-              '✓ Cultural Alignment'
+              '✓ Code-Switching Detection',
+              '✓ Cultural Marker Analysis'
             ] : [
               '✓ 5-Layer Reflexion',
-              '✓ Papiamentu NLP (basic)',
-              '✓ Emotion Detection (basic)',
+              '✓ Papiamentu NLP',
+              '✓ Emotion Detection',
               '✓ Cultural Alignment',
               '✓ In-memory datasets'
             ],
-            features_coming_phase2b: [
-              'KV Caching for performance',
-              'Advanced NLP with full dialect support',
-              'Caribbean-calibrated emotion detection',
-              '10-dimension cultural scoring'
+            features_coming_phase4: [
+              '⚡ KV Edge Caching (millisecond response times)',
+              '🛡️ API Rate Limiting & Quotas',
+              '📊 Advanced Analytics Dashboard',
+              '🔒 API Key Authentication'
             ],
             datasets_searched: datasets.length,
             session_id: sessionId || null
@@ -718,136 +734,23 @@ async function trackAnalytics(path, method, status, responseTime, ip, userAgent,
   }
 }
 
-/**
- * Helper: Analyze language (simplified NLP)
- * Phase 2 will integrate full PapiamentuNLP service
- */
-function analyzeLanguage(text) {
-  const textLower = text.toLowerCase();
-
-  // Papiamentu indicators
-  const papiamentuWords = ['kiko', 'kon', 'ta', 'bo', 'mi', 'nos', 'nan', 'ku', 'pa', 'di', 'den', 'dushi', 'bon', 'abo'];
-  const papiamentuCount = papiamentuWords.filter(word => textLower.includes(word)).length;
-
-  // Aruba dialect markers
-  const arubaMarkers = ['abo', 'dushi', 'hopi'];
-  const isAruba = arubaMarkers.some(marker => textLower.includes(marker));
-
-  // Determine primary language
-  let primary_language = 'english';
-  let dialect = null;
-
-  if (papiamentuCount >= 2) {
-    primary_language = 'papiamentu';
-    dialect = isAruba ? 'aruba' : 'bonaire'; // Default to Bonaire if not clearly Aruba
-  }
-
-  // Basic tokenization
-  const tokens = text.split(/\s+/).filter(t => t.length > 0);
-
-  // Cultural markers
-  const culturalMarkers = [];
-  const culturalWords = ['empatia', 'respet', 'famia', 'kultura', 'tradishon', 'komunidat'];
-  culturalWords.forEach(word => {
-    if (textLower.includes(word)) culturalMarkers.push(word);
-  });
-
-  return {
-    primary_language,
-    dialect,
-    tokens,
-    cultural_markers: culturalMarkers,
-    is_mixed_language: papiamentuCount > 0 && papiamentuCount < tokens.length / 2
-  };
-}
 
 /**
- * Helper: Detect emotion (simplified)
- * Phase 2 will integrate full EmotionAnalyzer with Caribbean calibration
+ * ===================================================================
+ * PHASE 3 COMPLETE! ✅
+ * ===================================================================
+ * 
+ * The simplified helper functions (analyzeLanguage, detectEmotion, 
+ * scoreCulturalAlignment) have been replaced with full Phase 3 services:
+ * 
+ * - PapiamentuNLP (520+ lines, 3 dialects)
+ * - EmotionAnalyzer (Caribbean-calibrated)
+ * - CulturalAlignmentScorer (10-dimension analysis)
+ * 
+ * All intelligence processing now uses advanced AI services.
+ * ===================================================================
  */
-function detectEmotion(text) {
-  const textLower = text.toLowerCase();
 
-  // Emotion keywords
-  const emotions = {
-    joy: ['kontentu', 'felis', 'alegre', 'happy', 'good'],
-    sadness: ['tristi', 'sad', 'dolor', 'pain'],
-    curiosity: ['kiko', 'kon', 'ken', 'what', 'how', 'who', 'why', '?'],
-    gratitude: ['danki', 'thank', 'gracias', 'grasia'],
-    concern: ['preokupá', 'worry', 'concern', 'problem']
-  };
-
-  let primary_emotion = 'neutral';
-  let maxScore = 0;
-
-  for (const [emotion, keywords] of Object.entries(emotions)) {
-    const score = keywords.filter(kw => textLower.includes(kw)).length;
-    if (score > maxScore) {
-      maxScore = score;
-      primary_emotion = emotion;
-    }
-  }
-
-  // Caribbean warmth baseline (+15%)
-  const warmth_level = textLower.includes('dushi') || textLower.includes('mi dushi') ? 'high' : 'medium';
-
-  return {
-    primary_emotion,
-    secondary_emotions: maxScore > 1 ? ['warmth'] : [],
-    intensity: maxScore > 2 ? 0.8 : 0.5,
-    warmth_level,
-    caribbean_calibrated: true
-  };
-}
-
-/**
- * Helper: Score cultural alignment (simplified)
- * Phase 2 will integrate full CulturalAlignmentScorer with 10-dimension analysis
- */
-function scoreCulturalAlignment(response, context) {
-  let overall_score = 0.70; // Base score
-
-  // Boost for Papiamentu usage
-  if (context.has_papiamentu) overall_score += 0.15;
-
-  // Boost for cultural markers
-  if (context.cultural_markers_present) overall_score += 0.10;
-
-  // Boost for emotional warmth
-  if (context.emotion_context === 'joy' || context.emotion_context === 'gratitude') {
-    overall_score += 0.05;
-  }
-
-  // Cap at 1.0
-  overall_score = Math.min(overall_score, 1.0);
-
-  // Quality grade
-  let quality_grade = 'B';
-  if (overall_score >= 0.90) quality_grade = 'A+';
-  else if (overall_score >= 0.85) quality_grade = 'A';
-  else if (overall_score >= 0.75) quality_grade = 'B+';
-
-  return {
-    overall_score: Math.round(overall_score * 100) / 100,
-    quality_grade,
-    dimension_scores: {
-      language_appropriateness: 0.85,
-      cultural_sensitivity: 0.90,
-      contextual_relevance: 0.75,
-      respectfulness: 0.88,
-      empathy_level: 0.82,
-      warmth_factor: 0.90,
-      dialect_accuracy: context.dialect ? 0.80 : 0.70,
-      code_switching_quality: 0.75,
-      cultural_context_depth: 0.78,
-      authenticity: 0.85
-    },
-    strengths: ['Cultural sensitivity', 'Warmth factor', 'Respectfulness'],
-    recommendations: context.has_papiamentu
-      ? ['Maintain cultural authenticity']
-      : ['Consider adding more Papiamentu phrases']
-  };
-}
 
 /**
  * Get Studio HTML (minimal version for Cloudflare Workers)
