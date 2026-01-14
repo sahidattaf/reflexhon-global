@@ -423,7 +423,9 @@
       <div class="header-info">
         <div>Reflexhon Global 2027</div>
         <div style="font-size: 0.8rem; opacity: 0.8;">Caribbean • Aruba • Bonaire • Curaçao</div>
-        <div class="version-badge">v3.0.0 Cultural Intelligence</div>
+        <div class="version-badge" id="version-badge">
+          <span style="opacity: 0.6;">Loading...</span>
+        </div>
       </div>
     </div>
     <div class="header-subtitle">Human-Centered Intelligence • Papiamentu Cultural AI</div>
@@ -735,6 +737,7 @@
     // Load system features from API metadata
     async function loadSystemFeatures() {
       const featuresList = document.getElementById('features-list');
+      const versionBadge = document.getElementById('version-badge');
 
       try {
         // Make a simple test request to get metadata with features
@@ -754,7 +757,12 @@
           const features = data.metadata.features_active;
           const model = data.metadata.model || 'reflexhon-v3.0.0';
           const dbActive = data.metadata.database_active ? '✅' : '❌';
+          const dbStatus = data.metadata.database_active ? 'D1 Active' : 'In-Memory';
 
+          // Update top version badge
+          versionBadge.innerHTML = `${model} • ${dbActive} ${dbStatus}`;
+
+          // Update sidebar features
           featuresList.innerHTML = `
             <strong>System Status:</strong><br>
             <span style="color: #059669; font-weight: 600;">Model: ${model}</span><br>
@@ -764,6 +772,7 @@
           `;
         } else {
           // Fallback to basic features
+          versionBadge.innerHTML = 'v3.0.0 Cultural Intelligence';
           featuresList.innerHTML = `
             <strong>Features Active:</strong><br>
             ✓ 5-Layer Reflexion<br>
@@ -776,6 +785,7 @@
       } catch (error) {
         console.error('Failed to load system features:', error);
         // Fallback display
+        versionBadge.innerHTML = 'v3.0.0 Cultural Intelligence';
         featuresList.innerHTML = `
           <strong>Features Active:</strong><br>
           ✓ 5-Layer Reflexion<br>
