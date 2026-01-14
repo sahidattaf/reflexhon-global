@@ -283,21 +283,26 @@ class DatabaseService {
   async logAPIRequest(logEntry) {
     if (!this.db) throw new Error('Database not initialized');
 
-    await this.db.prepare(`
-      INSERT INTO api_logs (
-        session_id, endpoint, method, status_code, response_time_ms,
-        ip_address, user_agent, error_message, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-    `).bind(
-      logEntry.session_id || null,
-      logEntry.endpoint,
-      logEntry.method,
-      logEntry.status_code,
-      logEntry.response_time_ms || null,
-      logEntry.ip_address || null,
-      logEntry.user_agent || null,
-      logEntry.error_message || null
-    ).run();
+    try {
+      await this.db.prepare(`
+        INSERT INTO api_logs (
+          session_id, endpoint, method, status_code, response_time_ms,
+          ip_address, user_agent, error_message, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).bind(
+        logEntry.session_id || null,
+        logEntry.endpoint,
+        logEntry.method,
+        logEntry.status_code,
+        logEntry.response_time_ms || null,
+        logEntry.ip_address || null,
+        logEntry.user_agent || null,
+        logEntry.error_message || null
+      ).run();
+    } catch (error) {
+      // Log error but don't fail - analytics is non-critical
+      console.error('Failed to log API request:', error.message);
+    }
   }
 
   /**
@@ -329,26 +334,40 @@ class DatabaseService {
   async getAPIAnalytics(hours = 24) {
     if (!this.db) throw new Error('Database not initialized');
 
-    const stats = await this.db.prepare(`
-      SELECT
-        COUNT(*) as total_requests,
-        COUNT(DISTINCT session_id) as unique_sessions,
-        COUNT(DISTINCT ip_address) as unique_visitors,
-        AVG(response_time_ms) as avg_response_time,
-        SUM(CASE WHEN status_code = 200 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as success_rate,
-        SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count
-      FROM api_logs
-      WHERE created_at >= datetime('now', '-' || ? || ' hours')
-    `).bind(hours).first();
+    try {
+      const stats = await this.db.prepare(`
+        SELECT
+          COUNT(*) as total_requests,
+          COUNT(DISTINCT session_id) as unique_sessions,
+          COUNT(DISTINCT ip_address) as unique_visitors,
+          AVG(response_time_ms) as avg_response_time,
+          SUM(CASE WHEN status_code = 200 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as success_rate,
+          SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) as error_count
+        FROM api_logs
+        WHERE created_at >= datetime('now', '-' || ? || ' hours')
+      `).bind(hours).first();
 
-    return stats || {
-      total_requests: 0,
-      unique_sessions: 0,
-      unique_visitors: 0,
-      avg_response_time: 0,
-      success_rate: 100,
-      error_count: 0
-    };
+      return stats || {
+        total_requests: 0,
+        unique_sessions: 0,
+        unique_visitors: 0,
+        avg_response_time: 0,
+        success_rate: 100,
+        error_count: 0
+      };
+    } catch (error) {
+      console.error('Failed to get API analytics:', error.message);
+      // Return default stats if query fails
+      return {
+        total_requests: 0,
+        unique_sessions: 0,
+        unique_visitors: 0,
+        avg_response_time: 0,
+        success_rate: 100,
+        error_count: 0,
+        note: 'Analytics temporarily unavailable - schema mismatch'
+      };
+    }
   }
 
   // ================================================================
@@ -362,16 +381,21 @@ class DatabaseService {
   async trackSearch(searchData) {
     if (!this.db) throw new Error('Database not initialized');
 
-    await this.db.prepare(`
-      INSERT INTO search_analytics (
-        session_id, query, results_count, clicked_result_id, created_at
-      ) VALUES (?, ?, ?, ?, datetime('now'))
-    `).bind(
-      searchData.session_id || null,
-      searchData.query,
-      searchData.results_count || 0,
-      searchData.clicked_result_id || null
-    ).run();
+    try {
+      await this.db.prepare(`
+        INSERT INTO search_analytics (
+          session_id, query, results_count, clicked_result_id, created_at
+        ) VALUES (?, ?, ?, ?, datetime('now'))
+      `).bind(
+        searchData.session_id || null,
+        searchData.query,
+        searchData.results_count || 0,
+        searchData.clicked_result_id || null
+      ).run();
+    } catch (error) {
+      // Non-critical - just log the error
+      console.error('Failed to track search:', error.message);
+    }
   }
 
   /**
