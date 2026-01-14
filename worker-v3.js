@@ -20,18 +20,12 @@ import DatabaseService from './services/db/DatabaseService.js';
 import { getAllDatasets } from './datasets.js';
 
 // Phase 3: Advanced Intelligence Services - NOW ACTIVE!
-import PapiamentuNLP from './services/nlp/PapiamentuNLP.js';
-import EmotionAnalyzer from './services/emotion/EmotionAnalyzer.js';
-import CulturalAlignmentScorer from './services/memory/CulturalAlignmentScorer.js';
-import ConversationMemory from './services/memory/ConversationMemory.js';
-import SessionManager from './services/memory/SessionManager.js';
-
-// Initialize Phase 3 services (singletons)
-const papiamentuNLP = new PapiamentuNLP();
-const emotionAnalyzer = new EmotionAnalyzer();
-const culturalScorer = new CulturalAlignmentScorer();
-const conversationMemory = new ConversationMemory();
-const sessionManager = new SessionManager();
+// Import singleton instances (already instantiated in their modules)
+import papiamentuNLP from './services/nlp/PapiamentuNLP.js';
+import emotionAnalyzer from './services/emotion/EmotionAnalyzer.js';
+import culturalScorer from './services/memory/CulturalAlignmentScorer.js';
+import conversationMemory from './services/memory/ConversationMemory.js';
+import sessionManager from './services/memory/SessionManager.js';
 
 // Phase 4: Performance & Scale - Edge Caching + Rate Limiting
 const CACHE_TTL = {
