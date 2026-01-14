@@ -473,13 +473,9 @@
           </div>
 
           <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.85rem; color: #6b7280;">
+            <div id="features-list" style="font-size: 0.85rem; color: #6b7280;">
               <strong>Features Active:</strong><br>
-              ✓ 5-Layer Reflexion<br>
-              ✓ Papiamentu NLP<br>
-              ✓ Emotion Detection<br>
-              ✓ Cultural Alignment<br>
-              ✓ Memory & Learning
+              <span style="color: #9ca3af;">Loading...</span>
             </div>
           </div>
         </div>
@@ -735,6 +731,64 @@
         card.style.display = 'block';
       });
     });
+
+    // Load system features from API metadata
+    async function loadSystemFeatures() {
+      const featuresList = document.getElementById('features-list');
+
+      try {
+        // Make a simple test request to get metadata with features
+        const response = await fetch('/api/v1/reflexion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: 'test',
+            options: { include_reasoning: false }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.metadata && data.metadata.features_active) {
+          // Display features from backend
+          const features = data.metadata.features_active;
+          const model = data.metadata.model || 'reflexhon-v3.0.0';
+          const dbActive = data.metadata.database_active ? '✅' : '❌';
+
+          featuresList.innerHTML = `
+            <strong>System Status:</strong><br>
+            <span style="color: #059669; font-weight: 600;">Model: ${model}</span><br>
+            <span style="color: #059669; font-weight: 600;">Database: ${dbActive} ${data.metadata.database_active ? 'Active' : 'Inactive'}</span><br><br>
+            <strong>Features Active:</strong><br>
+            ${features.map(f => `${f}<br>`).join('')}
+          `;
+        } else {
+          // Fallback to basic features
+          featuresList.innerHTML = `
+            <strong>Features Active:</strong><br>
+            ✓ 5-Layer Reflexion<br>
+            ✓ Papiamentu NLP<br>
+            ✓ Emotion Detection<br>
+            ✓ Cultural Alignment<br>
+            ✓ Memory & Learning
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load system features:', error);
+        // Fallback display
+        featuresList.innerHTML = `
+          <strong>Features Active:</strong><br>
+          ✓ 5-Layer Reflexion<br>
+          ✓ Papiamentu NLP<br>
+          ✓ Emotion Detection<br>
+          ✓ Cultural Alignment<br>
+          <span style="color: #ef4444;">⚠ Could not load full feature list</span>
+        `;
+      }
+    }
+
+    // Load features on page load
+    loadSystemFeatures();
   </script>
 </body>
 </html>
