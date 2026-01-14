@@ -752,12 +752,12 @@
 
         const data = await response.json();
 
-        if (data.success && data.metadata && data.metadata.features_active) {
+        if (data.success && data.data && data.data.metadata && data.data.metadata.features_active) {
           // Display features from backend
-          const features = data.metadata.features_active;
-          const model = data.metadata.model || 'reflexhon-v3.0.0';
-          const dbActive = data.metadata.database_active ? '✅' : '❌';
-          const dbStatus = data.metadata.database_active ? 'D1 Active' : 'In-Memory';
+          const features = data.data.metadata.features_active;
+          const model = data.data.metadata.model || 'reflexhon-v3.0.0';
+          const dbActive = data.data.metadata.database_active ? '✅' : '❌';
+          const dbStatus = data.data.metadata.database_active ? 'D1 Active' : 'In-Memory';
 
           // Update top version badge
           versionBadge.innerHTML = `${model} • ${dbActive} ${dbStatus}`;
@@ -766,7 +766,7 @@
           featuresList.innerHTML = `
             <strong>System Status:</strong><br>
             <span style="color: #059669; font-weight: 600;">Model: ${model}</span><br>
-            <span style="color: #059669; font-weight: 600;">Database: ${dbActive} ${data.metadata.database_active ? 'Active' : 'Inactive'}</span><br><br>
+            <span style="color: #059669; font-weight: 600;">Database: ${dbActive} ${data.data.metadata.database_active ? 'Active' : 'Inactive'}</span><br><br>
             <strong>Features Active:</strong><br>
             ${features.map(f => `${f}<br>`).join('')}
           `;
