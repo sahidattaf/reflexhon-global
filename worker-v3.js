@@ -317,12 +317,20 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       // ===================================================================
       // LAYER 1: Advanced Papiamentu NLP Analysis (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const nlpAnalysis = await papiamentuNLP.analyzeText(input);
+      const nlpAnalysis = {
+        primary_language: papiamentuNLP.detectLanguage(input).primary,
+        dialect: papiamentuNLP.detectDialect(input).dialect,
+        tokens: papiamentuNLP.tokenize(input),
+        cultural_markers: papiamentuNLP._detectCulturalMarkers(input),
+        is_mixed_language: papiamentuNLP.detectLanguage(input).is_mixed,
+        structure: papiamentuNLP.analyzeStructure(input),
+        phrases: papiamentuNLP.extractPhrases(input)
+      };
 
       // ===================================================================
       // LAYER 2: Caribbean-Calibrated Emotion Detection (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const emotionResult = await emotionAnalyzer.analyzeEmotion(input, nlpAnalysis);
+      const emotionResult = emotionAnalyzer.detectEmotion(input);
 
       // ===================================================================
       // LAYER 3: Reflexion Engine - Intent & Entity Analysis
@@ -440,17 +448,14 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       // ===================================================================
       // LAYER 5: 10-Dimension Cultural Alignment Scoring (Phase 3 ACTIVE! 🎯)
       // ===================================================================
-      const culturalScoring = await culturalScorer.scoreResponse({
-        response: response,
-        input_language: nlpAnalysis.primary_language,
+      const culturalScoring = await culturalScorer.scoreAlignment(response, {
+        language_preference: nlpAnalysis.primary_language,
         dialect: nlpAnalysis.dialect,
-        emotion_context: emotionResult.primary_emotion,
+        emotion: emotionResult.primary_emotion,
         cultural_markers: nlpAnalysis.cultural_markers || [],
-        tokens: nlpAnalysis.tokens || [],
-        conversation_context: {
-          user_input: input,
-          matched_dataset: matchedDataset?.id || null
-        }
+        user_input: input,
+        matched_dataset: matchedDataset?.id || null,
+        situation: 'conversational'
       });
 
       // ===================================================================
