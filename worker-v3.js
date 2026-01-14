@@ -261,10 +261,8 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       }
 
       // Use Reflexion Engine for intelligent analysis
-      const reflexionEngine = new ReflexionEngine();
-
-      // Layer 1: Analyze input (intent, entities, cultural context)
-      const analysis = await reflexionEngine.analyzeInput(input, context);
+      // Note: ReflexionEngine is exported as a singleton instance, not a class
+      const analysis = await ReflexionEngine.analyzeInput(input, context);
 
       // Load datasets to find relevant cultural responses
       const datasetsResult = await getAllDatasets(env);
