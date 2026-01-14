@@ -246,12 +246,12 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
   const endpoint = path.replace('/api/v1', '');
 
   // ===================================================================
-  // POST /api/v1/reflexion - Advanced 5-layer reasoning
+  // POST /api/v1/reflexion - Advanced 5-layer reasoning with FULL v3.0.0 Features
   // ===================================================================
   if (endpoint === '/reflexion' && method === 'POST') {
     try {
       const body = await request.json();
-      const { input, context = {}, persona = {}, options = {} } = body;
+      const { input, context = {}, persona = {}, options = {}, sessionId = null } = body;
 
       if (!input) {
         return jsonResponse({
@@ -260,23 +260,41 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
         }, corsHeaders, 400);
       }
 
-      // Use Reflexion Engine for intelligent analysis
-      // Note: ReflexionEngine is exported as a singleton instance, not a class
-      const analysis = await ReflexionEngine.analyzeInput(input, context);
+      const processingStart = Date.now();
 
-      // Load datasets to find relevant cultural responses
+      // ===================================================================
+      // LAYER 1: Advanced NLP Analysis (Papiamentu-specific)
+      // ===================================================================
+      const nlpAnalysis = PapiamentuNLP.analyze(input);
+
+      // ===================================================================
+      // LAYER 2: Emotion Detection (Caribbean-calibrated)
+      // ===================================================================
+      const emotionResult = EmotionAnalyzer.detectEmotion(input);
+
+      // ===================================================================
+      // LAYER 3: Reflexion Engine - Intent & Entity Analysis
+      // ===================================================================
+      const analysis = await ReflexionEngine.analyzeInput(input, {
+        ...context,
+        language: nlpAnalysis.primary_language,
+        dialect: nlpAnalysis.dialect,
+        user_emotion: emotionResult.primary_emotion
+      });
+
+      // ===================================================================
+      // LAYER 4: Dataset Matching & Response Generation
+      // ===================================================================
       const datasetsResult = await getAllDatasets(env);
       const datasets = datasetsResult.data || [];
 
-      // Search for matching dataset based on input similarity
+      // Enhanced dataset matching with NLP insights
       const inputLower = input.toLowerCase();
       let matchedDataset = null;
       let bestMatchScore = 0;
 
       for (const dataset of datasets) {
         const datasetInputLower = dataset.input.toLowerCase();
-
-        // Calculate simple similarity score
         let score = 0;
 
         // Exact match
@@ -287,14 +305,19 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
         else if (datasetInputLower.includes(inputLower) || inputLower.includes(datasetInputLower)) {
           score = 80;
         }
-        // Word overlap
+        // NLP-enhanced word overlap
         else {
-          const inputWords = inputLower.split(/\s+/);
+          const inputTokens = nlpAnalysis.tokens || inputLower.split(/\s+/);
           const datasetWords = datasetInputLower.split(/\s+/);
-          const commonWords = inputWords.filter(word =>
-            word.length > 3 && datasetWords.includes(word)
+          const commonWords = inputTokens.filter(word =>
+            word.length > 3 && datasetWords.includes(word.toLowerCase())
           );
-          score = (commonWords.length / Math.max(inputWords.length, datasetWords.length)) * 70;
+          score = (commonWords.length / Math.max(inputTokens.length, datasetWords.length)) * 70;
+
+          // Boost score if cultural markers match
+          if (nlpAnalysis.cultural_markers && nlpAnalysis.cultural_markers.length > 0) {
+            score += 5;
+          }
         }
 
         if (score > bestMatchScore) {
@@ -303,7 +326,7 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
         }
       }
 
-      // Generate response based on matched dataset or fallback
+      // Generate culturally-aligned response
       let response = '';
       let confidence = 0;
 
@@ -312,62 +335,144 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
         response = matchedDataset.output;
         confidence = bestMatchScore / 100;
 
-        // Add bilingual explanation if only Papiamentu
+        // Add bilingual support based on language detection
         if (matchedDataset.language === 'papiamentu' && !response.includes('\n\n')) {
-          response += '\n\n[English translation: ' + matchedDataset.input.replace('Kiko ta', 'What is') + ' - This cultural concept is important in Caribbean communities.]';
+          if (nlpAnalysis.primary_language === 'english' || nlpAnalysis.is_mixed_language) {
+            response += '\n\n[English: This cultural concept is deeply rooted in Caribbean communities and values.]';
+          }
         }
       } else {
-        // Fallback: Generate contextual response based on analysis
-        response = `Mi a komprondé bo pregunta tokante "${input}". `;
+        // Culturally-aware fallback response
+        const greeting = nlpAnalysis.dialect === 'aruba' ? 'Dushi' : 'Mi dushi';
+        response = `${greeting}, mi a komprondé bo pregunta tokante "${input}". `;
 
         if (analysis.intent === 'question') {
-          response += 'Laga mi ekspliká esaki for di un perspektiva Karibense.\n\n';
+          response += 'Laga mi ekspliká esaki for di un perspektiva Karibense ku kalidat i respet.\n\n';
         }
 
-        response += 'Den nos kultura Karibense, nos ta balora kalidat, respet, i konekshon entre hende. ';
+        // Add emotional warmth based on detected emotion
+        if (emotionResult.warmth_level === 'high') {
+          response += 'Mi ta sinti bo kurason den e pregunta aki. ';
+        }
+
+        response += 'Den nos kultura Karibense, nos ta balora kalidat, respet, empatia i konekshon profundo entre hende. ';
 
         if (analysis.entities && analysis.entities.length > 0) {
           const culturalTerms = analysis.entities.map(e => e.value).join(', ');
-          response += `Bo ta puntra tokante konsepto importante: ${culturalTerms}. `;
+          response += `Bo ta puntra tokante konsepto fundamental: ${culturalTerms}. E ta parti di nos identidad kultural. `;
         }
 
-        response += 'Mi ta invita bo pa puntra mas tokante empatia, respeto, famia, òf kualke balor Karibense.\n\n';
-        response += `I understood your question about "${input}". In our Caribbean culture, we value warmth, respect, and connection between people. I invite you to ask more about empathy, respect, family, or any Caribbean values.`;
+        response += '\n\nMi ta invita bo pa kontinuá e konbersashon aki. Puntra mi mas tokante empatia, respeto, famia, tradishon, òf kualke balor Karibense ku ta toka bo kurason.\n\n';
+        response += `I understand your question about "${input}". In our Caribbean culture, we deeply value warmth, respect, empathy and profound human connection. I invite you to continue this conversation and ask me more about our cultural values.`;
 
-        confidence = 0.75;
+        confidence = 0.80;
       }
 
-      // Calculate cultural alignment score
-      const culturalScore = matchedDataset ? 95 : 85;
-      const qualityScore = matchedDataset ? 92 : 80;
+      // ===================================================================
+      // LAYER 5: Cultural Alignment Scoring (10-dimension analysis)
+      // ===================================================================
+      const culturalScoring = await CulturalAlignmentScorer.scoreAlignment(response, {
+        input_language: nlpAnalysis.primary_language,
+        dialect: nlpAnalysis.dialect,
+        emotion_context: emotionResult.primary_emotion,
+        cultural_markers_present: nlpAnalysis.cultural_markers?.length > 0
+      });
+
+      // ===================================================================
+      // Memory & Learning: Store conversation context
+      // ===================================================================
+      if (sessionId) {
+        try {
+          await ConversationMemory.storeMessage(sessionId, {
+            role: 'user',
+            content: input,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              language: nlpAnalysis.primary_language,
+              emotion: emotionResult.primary_emotion,
+              intent: analysis.intent
+            }
+          });
+
+          await ConversationMemory.storeMessage(sessionId, {
+            role: 'assistant',
+            content: response,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              confidence: confidence,
+              cultural_score: culturalScoring.overall_score,
+              matched_dataset: matchedDataset?.id
+            }
+          });
+        } catch (memError) {
+          console.warn('Memory storage failed:', memError.message);
+          // Continue even if memory fails
+        }
+      }
+
+      const processingTime = Date.now() - processingStart;
 
       return jsonResponse({
         success: true,
         data: {
           response: response,
           confidence: confidence,
+
+          // Layer 1: NLP Analysis
+          nlp_analysis: {
+            language: nlpAnalysis.primary_language,
+            dialect: nlpAnalysis.dialect,
+            tokens: nlpAnalysis.tokens?.length || 0,
+            is_code_switched: nlpAnalysis.is_mixed_language || false,
+            cultural_markers: nlpAnalysis.cultural_markers || []
+          },
+
+          // Layer 2: Emotion Detection
+          emotion: {
+            primary: emotionResult.primary_emotion,
+            secondary: emotionResult.secondary_emotions,
+            intensity: emotionResult.intensity,
+            warmth_level: emotionResult.warmth_level,
+            caribbean_calibrated: true
+          },
+
+          // Layer 3: Intent & Entity Analysis
           analysis: {
             intent: analysis.intent,
-            language: analysis.language,
             complexity: analysis.complexity,
             entities: analysis.entities,
             cultural_context: analysis.culturalContext
           },
+
+          // Layer 4: Dataset Matching
           matched_dataset: matchedDataset ? {
             id: matchedDataset.id,
             category: matchedDataset.category,
             match_score: Math.round(bestMatchScore)
           } : null,
-          scores: {
-            overall_quality: qualityScore,
-            cultural_alignment: culturalScore,
-            quality_level: qualityScore >= 90 ? 'excellent' : 'good'
+
+          // Layer 5: Cultural Alignment Scores
+          cultural_alignment: {
+            overall_score: culturalScoring.overall_score,
+            quality_grade: culturalScoring.quality_grade,
+            dimensions: culturalScoring.dimension_scores,
+            strengths: culturalScoring.strengths,
+            recommendations: culturalScoring.recommendations
           },
+
           metadata: {
-            processing_time_ms: Date.now() - startTime,
-            model: 'reflexhon-v3.0.0-intelligent',
-            layers_processed: 3,
-            datasets_searched: datasets.length
+            processing_time_ms: processingTime,
+            model: 'reflexhon-v3.0.0-full',
+            layers_processed: 5,
+            features_active: [
+              '5-Layer Reflexion',
+              'Papiamentu NLP',
+              'Emotion Detection',
+              'Cultural Alignment',
+              'Memory & Learning'
+            ],
+            datasets_searched: datasets.length,
+            session_id: sessionId || null
           }
         }
       }, corsHeaders);
@@ -377,7 +482,8 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       return jsonResponse({
         success: false,
         error: 'Reflexion processing failed',
-        message: error.message
+        message: error.message,
+        stack: env.NODE_ENV === 'development' ? error.stack : undefined
       }, corsHeaders, 500);
     }
   }
