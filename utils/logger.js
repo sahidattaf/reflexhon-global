@@ -12,7 +12,8 @@ export const logger = {
   },
 
   debug: (message, meta = {}) => {
-    if (process.env.NODE_ENV === 'development') {
+    // Only log debug in development (Workers don't have process.env)
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
       console.debug(`[DEBUG] ${new Date().toISOString()} - ${message}`, meta);
     }
   }
