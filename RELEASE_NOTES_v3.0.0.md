@@ -2,7 +2,9 @@
 
 **Release Date:** January 13, 2026
 **Codename:** Cultural Intelligence
-**Status:** ✅ Production Ready
+**Status:** Historical release record; current production behavior and quality claims require independent verification
+
+> **Verification notice (2026-08-12):** Live `/health` and `/api` report v3.0.0, but repeated test runs on the current baseline produced 2–3 failures among 44 tests, and lint is not clean. Numerical performance, accuracy, dataset-count, code-size, and pass-rate statements below are historical release claims rather than current verified benchmarks. Advanced modules exist in the repository, while `worker-v3.js` states that several are not fully integrated into the deployed request path.
 
 ---
 
