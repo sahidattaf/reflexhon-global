@@ -368,7 +368,7 @@ export default {
       }
 
       // Feedback endpoint for datasets
-      const feedbackMatch = path.match(/^\/api\/v1\/datasets\/([^\/]+)\/feedback\/?$/);
+      const feedbackMatch = path.match(/^\/api\/v1\/datasets\/([^/]+)\/feedback\/?$/);
       if (feedbackMatch) {
         if (request.method !== 'POST') {
           return new Response(
@@ -437,7 +437,7 @@ export default {
       }
 
       // Get dataset by ID
-      const datasetIdMatch = path.match(/^\/api\/v1\/datasets\/([^\/]+)\/?$/);
+      const datasetIdMatch = path.match(/^\/api\/v1\/datasets\/([^/]+)\/?$/);
       if (datasetIdMatch) {
         const id = datasetIdMatch[1];
         let result;

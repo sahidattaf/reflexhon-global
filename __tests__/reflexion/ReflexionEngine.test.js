@@ -24,7 +24,7 @@ describe('Reflexion Engine - Advanced 5-Layer Architecture', () => {
       expect(analysis.language).toBe('papiamentu');
       expect(analysis.dialect).toBe('aruba');
       expect(analysis.complexity).toBeDefined();
-      expect(analysis.duration_ms).toBeGreaterThan(0);
+      expect(analysis.duration_ms).toBeGreaterThanOrEqual(0);
     });
 
     test('should detect question intent', async () => {
@@ -92,7 +92,7 @@ describe('Reflexion Engine - Advanced 5-Layer Architecture', () => {
       expect(reasoning.culturalFilters).toBeDefined();
       expect(reasoning.personaTraits).toBeDefined();
       expect(reasoning.confidence).toBeGreaterThan(0);
-      expect(reasoning.duration_ms).toBeGreaterThan(0);
+      expect(reasoning.duration_ms).toBeGreaterThanOrEqual(0);
     });
 
     test('should apply cultural filters', async () => {

@@ -159,7 +159,7 @@ class EmotionAnalyzer {
       exclamation: /[!¡]/g,
       question: /[?¿]/g,
       emphasis: /[A-Z]{2,}/g,
-      emoticons: /[😊😃😄😁🙂😢😭😡😠😨😱❤️💕💖]/g
+      emoticons: /(😊|😃|😄|😁|🙂|😢|😭|😡|😠|😨|😱|❤️|💕|💖)/gu
     };
   }
 
@@ -361,7 +361,7 @@ class EmotionAnalyzer {
     warmth = Math.min(warmth, 1.0);
 
     // Detect playfulness
-    const playfulMarkers = /[😊😃😄!]{2,}/;
+    const playfulMarkers = /[😊😃😄!]{2,}/u;
     const isPlayful = playfulMarkers.test(text);
 
     // Determine primary tone

@@ -40,12 +40,13 @@ Routes described in older v2 documentation are not considered live unless they a
 Validation of the `main` commit `1c08c45f91146a1f77ae9f0c72882dbe8f7766b4` on 2026-08-12 produced:
 
 - `npm ci`: completed
-- `npm test -- --runInBand --silent`: **not clean**; repeated runs observed 2–3 failures among 44 tests
-- `npm run lint`: **483 errors and 64 warnings**
+- baseline before P0 fixes: repeated test runs observed 2–3 failures among 44 tests
+- baseline before P0 fixes: lint reported **483 errors and 64 warnings**
+- current P0 branch: **51 passing tests**; lint has **0 errors** with 61 remaining warnings tracked as technical debt
 - live `/health`: HTTP 200 and version `3.0.0`
 - live `/api`: HTTP 200 and version `3.0.0`
 
-The repository therefore does not currently claim a clean test or lint baseline. See the P0 priorities below.
+This is a verified branch-level baseline, not a production benchmark. See the P0 priorities below.
 
 ## Local setup
 

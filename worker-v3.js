@@ -18,6 +18,9 @@
 import ReflexionEngine from './services/reflexion/ReflexionEngine.js';
 import { getAllDatasets } from './datasets.js';
 
+const MAX_JSON_BYTES = 16 * 1024;
+const MAX_TEXT_LENGTH = 4000;
+
 // Advanced services (Phase 3) - Will be integrated after Phase 2 completion
 // - PapiamentuNLP (language detection, tokenization, dialect identification)
 // - EmotionAnalyzer (Caribbean-calibrated emotion detection)
@@ -222,15 +225,14 @@ export default {
       return jsonResponse({
         success: false,
         error: 'Internal Server Error',
-        message: error.message,
-        stack: env.NODE_ENV === 'development' ? error.stack : undefined
+        message: 'The request could not be completed.'
       }, {}, 500);
 
     } finally {
       // Track analytics (non-blocking)
       const responseTime = Date.now() - startTime;
       ctx.waitUntil(
-        trackAnalytics(path, method, 200, responseTime, request.headers.get('cf-connecting-ip'))
+        trackAnalytics(path, method, 200, responseTime)
       );
     }
   }
@@ -247,13 +249,31 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
   // ===================================================================
   if (endpoint === '/reflexion' && method === 'POST') {
     try {
-      const body = await request.json();
+      const body = await parseJsonBody(request);
       const { input, context = {}, persona = {}, options = {}, sessionId = null } = body;
 
-      if (!input) {
+      if (typeof input !== 'string' || !input.trim()) {
         return jsonResponse({
           success: false,
           error: 'Input is required'
+        }, corsHeaders, 400);
+      }
+      if (input.length > MAX_TEXT_LENGTH) {
+        return jsonResponse({
+          success: false,
+          error: `Input exceeds the ${MAX_TEXT_LENGTH}-character limit`
+        }, corsHeaders, 413);
+      }
+      if (!isPlainObject(context) || !isPlainObject(persona) || !isPlainObject(options)) {
+        return jsonResponse({
+          success: false,
+          error: 'Context, persona, and options must be JSON objects'
+        }, corsHeaders, 400);
+      }
+      if (sessionId !== null && (typeof sessionId !== 'string' || sessionId.length > 128)) {
+        return jsonResponse({
+          success: false,
+          error: 'Session ID must be a string of at most 128 characters'
         }, corsHeaders, 400);
       }
 
@@ -458,11 +478,16 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
 
     } catch (error) {
       console.error('Reflexion error:', error);
+      if (error instanceof RequestError) {
+        return jsonResponse({
+          success: false,
+          error: error.message
+        }, corsHeaders, error.status);
+      }
       return jsonResponse({
         success: false,
         error: 'Reflexion processing failed',
-        message: error.message,
-        stack: env.NODE_ENV === 'development' ? error.stack : undefined
+        message: 'The request could not be completed.'
       }, corsHeaders, 500);
     }
   }
@@ -484,10 +509,16 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       }, corsHeaders);
 
     } catch (error) {
+      if (error instanceof RequestError) {
+        return jsonResponse({
+          success: false,
+          error: error.message
+        }, corsHeaders, error.status);
+      }
       return jsonResponse({
         success: false,
         error: 'Failed to load datasets',
-        message: error.message
+        message: 'The request could not be completed.'
       }, corsHeaders, 500);
     }
   }
@@ -511,14 +542,20 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
   // ===================================================================
   if (endpoint === '/emotion' && method === 'POST') {
     try {
-      const body = await request.json();
+      const body = await parseJsonBody(request);
       const { text } = body;
 
-      if (!text) {
+      if (typeof text !== 'string' || !text.trim()) {
         return jsonResponse({
           success: false,
           error: 'Text is required'
         }, corsHeaders, 400);
+      }
+      if (text.length > MAX_TEXT_LENGTH) {
+        return jsonResponse({
+          success: false,
+          error: `Text exceeds the ${MAX_TEXT_LENGTH}-character limit`
+        }, corsHeaders, 413);
       }
 
       const emotion = detectEmotion(text);
@@ -542,10 +579,16 @@ async function handleAPIv1(path, method, request, env, corsHeaders, startTime, c
       }, corsHeaders);
 
     } catch (error) {
+      if (error instanceof RequestError) {
+        return jsonResponse({
+          success: false,
+          error: error.message
+        }, corsHeaders, error.status);
+      }
       return jsonResponse({
         success: false,
         error: 'Emotion analysis failed',
-        message: error.message
+        message: 'The request could not be completed.'
       }, corsHeaders, 500);
     }
   }
@@ -593,10 +636,50 @@ function jsonResponse(data, headers = {}, status = 200) {
   });
 }
 
+export async function parseJsonBody(request) {
+  const contentType = request.headers.get('content-type') || '';
+  if (!contentType.toLowerCase().includes('application/json')) {
+    throw new RequestError('Content-Type must be application/json', 415);
+  }
+
+  const declaredLength = Number(request.headers.get('content-length'));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_JSON_BYTES) {
+    throw new RequestError('Request body is too large', 413);
+  }
+
+  const rawBody = await request.text();
+  if (new TextEncoder().encode(rawBody).byteLength > MAX_JSON_BYTES) {
+    throw new RequestError('Request body is too large', 413);
+  }
+
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (!isPlainObject(parsed)) {
+      throw new RequestError('JSON body must be an object', 400);
+    }
+    return parsed;
+  } catch (error) {
+    if (error instanceof RequestError) throw error;
+    throw new RequestError('Request body contains invalid JSON', 400);
+  }
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+class RequestError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = 'RequestError';
+    this.status = status;
+  }
+}
+
 /**
  * Helper: Track analytics (simplified - Phase 2 will add persistent storage)
  */
-async function trackAnalytics(path, method, status, responseTime, ip) {
+async function trackAnalytics(path, method, status, responseTime) {
   try {
     // In-memory tracking only for now
     // Phase 2 will add D1 database for persistent analytics
