@@ -1,0 +1,51 @@
+{
+  "name": "reflexhon-global",
+  "version": "0.1.0",
+  "description": "🧠 Reflexhon Global 2027 - Human-Centered Intelligence Ecosystem",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "npx serve public/",
+    "build": "npm run validate",
+    "validate": "bash setup_reflexhon_launch.sh",
+    "serve": "npx serve public/ --listen 3000",
+    "lint:docs": "echo '✅ Documentation validation placeholder'",
+    "test": "echo '✅ Test suite placeholder (Phase 2)'",
+    "precommit": "npm run lint:docs"
+  },
+  "keywords": [
+    "ai",
+    "ethics",
+    "creator-economy",
+    "papiamentu",
+    "caribbean",
+    "human-centered-ai",
+    "reflexion",
+    "dao"
+  ],
+  "author": "@sahidattaf",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sahidattaf/reflexhon-global.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sahidattaf/reflexhon-global/issues"
+  },
+  "homepage": "https://github.com/sahidattaf/reflexhon-global#readme",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "dependencies": {},
+  "phase": "1-prototype-mvp",
+  "phase_info": "Phase 1 (2024-2025): Documentation-heavy prototype. Phase 2 (2026): Full npm/Node.js stack, TypeScript migration, Google Gemini integration. Phase 3 (2027): Mesh AI, global economy.",
+  "reflexhon_notes": {
+    "package_json_purpose": "This package.json scaffolds the Reflexhon project structure and provides dev commands. The npm ecosystem will expand in Phase 2.",
+    "current_capabilities": "Static asset serving, documentation validation, GitHub Pages deployment",
+    "future_dependencies": "@google/generative-ai, firebase, next.js, tailwind, prisma, redis",
+    "culture": "Always preserve Papiamentu context and human-centered reasoning in all code additions"
+  }
+}
