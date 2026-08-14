@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reflexhon Studio - Live Analytics Dashboard</title>
+  <title>Reflexhon Studio - Usage Preview</title>
   <style>
     * {
       margin: 0;
@@ -380,7 +380,7 @@
         <span class="nav-tab-icon">📊</span> Dataset Explorer
       </button>
       <button class="nav-tab active">
-        <span class="nav-tab-icon">📈</span> Analytics
+        <span class="nav-tab-icon">📈</span> Usage Preview
       </button>
     </div>
   </div>
@@ -391,21 +391,15 @@
         <div>
           <div class="dashboard-title">
             <span style="font-size: 2rem;">📊</span>
-            <h2>Live Analytics Dashboard</h2>
+            <h2>Analytics Route Preview</h2>
           </div>
-          <p class="dashboard-subtitle">Real-time insights from your Cultural AI API</p>
+          <p class="dashboard-subtitle">The current API returns simplified in-memory placeholders. This is not persistent or real-time production analytics.</p>
         </div>
         <button class="share-btn">
           <span>🔗</span> Share
         </button>
       </div>
 
-      <div class="time-selector">
-        <button class="time-btn">1h</button>
-        <button class="time-btn active">24h</button>
-        <button class="time-btn">7d</button>
-        <button class="time-btn">30d</button>
-      </div>
     </div>
 
     <div class="metrics-grid">
@@ -420,11 +414,11 @@
 
       <div class="metric-card green">
         <div class="metric-icon">👥</div>
-        <div class="metric-label">Unique Visitors</div>
+        <div class="metric-label">Visitor identity</div>
         <div class="metric-value" id="unique-visitors">
           <span class="loading"></span>
         </div>
-        <div class="metric-subtitle">Worldwide</div>
+        <div class="metric-subtitle">Not collected by this preview</div>
       </div>
 
       <div class="metric-card purple">
@@ -438,9 +432,9 @@
 
       <div class="metric-card orange">
         <div class="metric-icon">🌍</div>
-        <div class="metric-label">Global Edge</div>
-        <div class="metric-value">300+</div>
-        <div class="metric-subtitle">Cloudflare locations</div>
+        <div class="metric-label">Runtime</div>
+        <div class="metric-value" style="font-size: 1.5rem;">Worker</div>
+        <div class="metric-subtitle">Cloudflare Workers</div>
       </div>
     </div>
 
@@ -473,14 +467,12 @@
     </div>
 
     <div class="update-time" id="update-time">
-      Last updated: <span id="timestamp">--:--:--</span> • Auto-refreshes every 30 seconds
+      Snapshot retrieved: <span id="timestamp">--:--:--</span> • Values may be placeholders
     </div>
   </div>
 
   <script>
     // Analytics data fetching and display
-    let refreshInterval;
-
     async function fetchAnalytics() {
       try {
         const response = await fetch('/api/v1/analytics');
@@ -507,7 +499,7 @@
         } else {
           endpointsList.innerHTML = `
             <li class="endpoint-item">
-              <span class="endpoint-path">/api/v1/datasets</span>
+              <span class="endpoint-path">No persisted endpoint data</span>
               <span class="endpoint-count">0</span>
             </li>
           `;
@@ -541,15 +533,7 @@
 
       document.getElementById('top-endpoints').innerHTML = `
         <li class="endpoint-item">
-          <span class="endpoint-path">/api/v1/datasets</span>
-          <span class="endpoint-count">0</span>
-        </li>
-        <li class="endpoint-item">
-          <span class="endpoint-path">/api/v1/reflexion</span>
-          <span class="endpoint-count">0</span>
-        </li>
-        <li class="endpoint-item">
-          <span class="endpoint-path">/api/v1/translate</span>
+          <span class="endpoint-path">No persisted endpoint data</span>
           <span class="endpoint-count">0</span>
         </li>
       `;
@@ -592,14 +576,8 @@
       }
     });
 
-    // Initial load and auto-refresh
+    // Initial snapshot only. Persistent analytics are not implemented yet.
     fetchAnalytics();
-    refreshInterval = setInterval(fetchAnalytics, 30000); // Refresh every 30 seconds
-
-    // Clean up on page unload
-    window.addEventListener('beforeunload', () => {
-      clearInterval(refreshInterval);
-    });
   </script>
 </body>
 </html>

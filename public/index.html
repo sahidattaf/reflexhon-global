@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reflexhon Studio - Cultural AI Platform</title>
+  <title>Reflexhon Studio Public Beta</title>
   <style>
     * {
       margin: 0;
@@ -66,6 +66,111 @@
       font-size: 0.8rem;
       display: inline-block;
       margin-top: 0.25rem;
+    }
+
+    .beta-badge {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .beta-notice, .community-card, .footer-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1rem 1.25rem;
+    }
+
+    .beta-notice {
+      margin-bottom: 1rem;
+      border-left: 5px solid #f59e0b;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .prompt-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .prompt-chip, .secondary-btn {
+      border: 1px solid #0891b2;
+      background: white;
+      color: #0e7490;
+      padding: 0.55rem 0.8rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .prompt-chip:hover, .secondary-btn:hover {
+      background: #ecfeff;
+    }
+
+    .community-card {
+      margin-top: 1rem;
+      text-align: center;
+      color: #4b5563;
+    }
+
+    .community-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .secondary-btn[aria-disabled="true"] {
+      color: #6b7280;
+      border-color: #d1d5db;
+      cursor: not-allowed;
+      background: #f3f4f6;
+    }
+
+    .footer-card {
+      max-width: 1400px;
+      margin: 0 auto 2rem;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .footer-card details + details {
+      margin-top: 0.75rem;
+    }
+
+    .footer-card summary {
+      cursor: pointer;
+      color: #0e7490;
+      font-weight: 700;
+    }
+
+    .scope-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .header-top, .dataset-search { flex-direction: column; align-items: flex-start; }
+      .header-info { text-align: left; }
+      .chat-container { grid-template-columns: 1fr; height: auto; }
+      .chat-sidebar { order: 2; }
+      .chat-main { min-height: 65vh; }
+      .nav-tabs { gap: 0; overflow-x: auto; }
+      .container { padding: 1rem; }
     }
 
     .nav-tabs {
@@ -418,7 +523,7 @@
     <div class="header-top">
       <div class="header-title">
         <span class="palm-icon">🌴</span>
-        <h1>Reflexhon Studio</h1>
+        <h1>Reflexhon Studio <span class="beta-badge">PUBLIC BETA</span></h1>
       </div>
       <div class="header-info">
         <div>Reflexhon Global 2027</div>
@@ -426,7 +531,7 @@
         <div class="version-badge">v3.0.0 Cultural Intelligence</div>
       </div>
     </div>
-    <div class="header-subtitle">Human-Centered Intelligence • Papiamentu Cultural AI</div>
+    <div class="header-subtitle">Test a human-centered Papiamentu experience and help improve it through feedback.</div>
 
     <div class="nav-tabs">
       <button class="nav-tab active" data-tab="chat">
@@ -436,12 +541,15 @@
         <span class="nav-tab-icon">📊</span> Dataset Explorer
       </button>
       <button class="nav-tab" data-tab="analytics">
-        <span class="nav-tab-icon">📈</span> Analytics
+        <span class="nav-tab-icon">📈</span> Usage Preview
       </button>
     </div>
   </div>
 
   <div class="container">
+    <div class="beta-notice" role="status">
+      <strong>Public beta:</strong> Reflexhon can make mistakes. Responses are experimental and should be reviewed by a person, especially for cultural, educational, legal, medical, or financial use.
+    </div>
     <!-- AI Chat Tab -->
     <div class="tab-content active" id="chat">
       <div class="chat-container">
@@ -459,28 +567,25 @@
             </button>
           </div>
 
-          <h3>Cultural Context</h3>
+          <h3>Context preference</h3>
           <div class="language-selector">
-            <button class="language-btn active" data-context="caribbean">
-              🏝️ Caribbean
+            <button class="language-btn active" data-context="curacao">
+              🇨🇼 Curaçao
             </button>
-            <button class="language-btn" data-context="formal">
-              📋 Formal
+            <button class="language-btn" data-context="aruba">
+              🇦🇼 Aruba
             </button>
-            <button class="language-btn" data-context="casual">
-              😊 Casual
+            <button class="language-btn" data-context="bonaire">
+              🇧🇶 Bonaire
+            </button>
+            <button class="language-btn" data-context="general">
+              🌐 General
             </button>
           </div>
 
-          <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.85rem; color: #6b7280;">
-              <strong>Features Active:</strong><br>
-              ✓ 5-Layer Reflexion<br>
-              ✓ Papiamentu NLP<br>
-              ✓ Emotion Detection<br>
-              ✓ Cultural Alignment<br>
-              ✓ Memory & Learning
-            </div>
+          <div class="scope-box">
+            <strong>Current beta scope</strong><br>
+            Chat, dataset browsing and simplified analysis routes are available for testing. Advanced cultural, emotion and memory modules exist in the project but are not presented here as fully verified end-to-end capabilities.
           </div>
         </div>
 
@@ -488,10 +593,12 @@
           <div class="chat-messages" id="chat-messages">
             <div class="welcome-message">
               <h3>Bon bini na Reflexhon Studio!</h3>
-              <p>Ask me anything in Papiamentu, English, or mix both languages naturally.</p>
-              <p style="margin-top: 1rem; font-size: 0.9rem;">
-                Try: <em>"Kiko ta empatia?"</em> or <em>"Explain respeto na nos kultura"</em>
-              </p>
+              <p>Test a prompt in Papiamentu or English, then help us improve the response.</p>
+              <div class="prompt-list" aria-label="Example prompts">
+                <button class="prompt-chip" data-prompt="Kiko ta empatia?">Kiko ta empatia?</button>
+                <button class="prompt-chip" data-prompt="Splika respeto den contexto di Curaçao.">Respeto na Curaçao</button>
+                <button class="prompt-chip" data-prompt="Tradusí 'community care' na Papiamentu natural.">Test un tradukshon</button>
+              </div>
             </div>
           </div>
 
@@ -527,7 +634,7 @@
       <div class="dataset-header">
         <h2>📊 Cultural Dataset Explorer</h2>
         <p style="color: #6b7280; margin-top: 0.5rem;">
-          Explore 70+ Papiamentu cultural expressions and contexts
+          Browse the cultural records currently returned by the verified dataset route. Record count and quality may change during beta.
         </p>
         <div class="dataset-search">
           <input
@@ -557,13 +664,51 @@
         style="width: 100%; height: calc(100vh - 200px); border: none; border-radius: 12px;"
       ></iframe>
     </div>
+    <div class="community-card">
+      <strong>Help shape Reflexhon Beta</strong>
+      <p>Share a correction or report a cultural-context issue. GitHub feedback is public; do not include personal or sensitive information.</p>
+      <div class="community-actions">
+        <a class="secondary-btn" id="feedback-link" href="https://github.com/sahidattaf/reflexhon-global/issues/new?title=Beta%20feedback%3A%20&amp;body=What%20did%20you%20test%3F%0A%0AWhat%20should%20be%20corrected%3F%0A%0AIsland%20or%20language%20context%20(optional)%3A%0A%0APlease%20do%20not%20include%20personal%20or%20sensitive%20information." target="_blank" rel="noopener noreferrer">Give public feedback</a>
+        <a class="secondary-btn" id="beta-signup" href="https://forms.gle/G1iYxEPqV2Zpd6447" target="_blank" rel="noopener noreferrer">Join Beta Community</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-card">
+    <details>
+      <summary>Privacy during this beta</summary>
+      <p>Do not submit secrets or sensitive personal information. The page records only anonymous event counts in this browser tab for basic product measurement; prompt text and response text are not included in those counters. No external analytics collector is configured by this page.</p>
+    </details>
+    <details>
+      <summary>Limitations and human correction</summary>
+      <p>Papiamentu is not one homogeneous cultural context. Aruba, Bonaire and Curaçao can differ in language use and culture. Beta responses are not professional advice or verified cultural facts. Use the feedback link to challenge or correct a result.</p>
+    </details>
   </div>
 
   <script>
+    let sessionEvents = {};
+    try {
+      sessionEvents = JSON.parse(sessionStorage.getItem('reflexhon_beta_events') || '{}');
+    } catch (error) {
+      console.warn('Session event counters are unavailable:', error);
+    }
+
+    function trackEvent(name) {
+      sessionEvents[name] = (sessionEvents[name] || 0) + 1;
+      try {
+        sessionStorage.setItem('reflexhon_beta_events', JSON.stringify(sessionEvents));
+      } catch (error) {
+        console.warn('Session event counter could not be stored:', error);
+      }
+    }
+
+    trackEvent('page_view');
+
     // Tab switching
     document.querySelectorAll('.nav-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const tabName = tab.dataset.tab;
+        trackEvent(`tab_view_${tabName}`);
 
         // Update active tab
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -597,16 +742,32 @@
     const sendBtn = document.getElementById('send-btn');
     const typingIndicator = document.getElementById('typing-indicator');
 
+    document.querySelectorAll('.prompt-chip').forEach(button => {
+      button.addEventListener('click', () => {
+        chatInput.value = button.dataset.prompt;
+        chatInput.focus();
+        trackEvent('example_prompt_selected');
+      });
+    });
+
+    document.getElementById('feedback-link').addEventListener('click', () => trackEvent('feedback_opened'));
+    document.getElementById('beta-signup').addEventListener('click', () => trackEvent('beta_signup_opened'));
+
     function addMessage(content, isUser = false) {
       const welcomeMsg = chatMessages.querySelector('.welcome-message');
       if (welcomeMsg) welcomeMsg.remove();
 
       const messageDiv = document.createElement('div');
       messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
-      messageDiv.innerHTML = `
-        <div class="message-content">${content}</div>
-        <div class="message-meta">${new Date().toLocaleTimeString()}</div>
-      `;
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'message-content';
+      contentDiv.textContent = String(content);
+
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'message-meta';
+      metaDiv.textContent = new Date().toLocaleTimeString();
+
+      messageDiv.append(contentDiv, metaDiv);
       chatMessages.appendChild(messageDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -614,6 +775,7 @@
     async function sendMessage() {
       const message = chatInput.value.trim();
       if (!message) return;
+      trackEvent('message_submitted');
 
       // Add user message
       addMessage(message, true);
@@ -626,7 +788,7 @@
       try {
         // Get selected language and context
         const language = document.querySelector('[data-lang].active')?.dataset.lang || 'papiamentu';
-        const context = document.querySelector('[data-context].active')?.dataset.context || 'caribbean';
+        const context = document.querySelector('[data-context].active')?.dataset.context || 'curacao';
 
         // Call Reflexion API
         const response = await fetch('/api/v1/reflexion', {
@@ -656,13 +818,16 @@
         typingIndicator.classList.remove('active');
 
         if (data.success) {
+          trackEvent('response_success');
           addMessage(data.data.response || data.data.output || 'Mi ta aki pa yuda bo.');
         } else {
+          trackEvent('response_error');
           addMessage('Sorry, I encountered an error. Please try again.');
         }
 
       } catch (error) {
         console.error('Chat error:', error);
+        trackEvent('response_network_error');
         typingIndicator.classList.remove('active');
         addMessage('Mi ta sinti, but mi tin problema awo. Please try again.');
       }
@@ -688,14 +853,17 @@
         const data = await response.json();
 
         if (data.success && data.data && data.data.length > 0) {
+          const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+          })[character]);
           grid.innerHTML = data.data.map(dataset => `
             <div class="dataset-card">
-              <div class="dataset-title">${dataset.input || dataset.question || 'Cultural Expression'}</div>
-              <div class="dataset-category">${dataset.category || 'General'}</div>
-              <div class="dataset-content">${dataset.output || dataset.answer || dataset.response || ''}</div>
+              <div class="dataset-title">${escapeHtml(dataset.input || dataset.question || 'Cultural Expression')}</div>
+              <div class="dataset-category">${escapeHtml(dataset.category || 'General')}</div>
+              <div class="dataset-content">${escapeHtml(dataset.output || dataset.answer || dataset.response || '')}</div>
               <div class="dataset-meta">
-                <span>ID: ${dataset.id || 'N/A'}</span>
-                <span>${dataset.language || 'Papiamentu'}</span>
+                <span>ID: ${escapeHtml(dataset.id || 'N/A')}</span>
+                <span>${escapeHtml(dataset.language || 'Papiamentu')}</span>
               </div>
             </div>
           `).join('');
