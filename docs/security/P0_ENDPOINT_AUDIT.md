@@ -16,6 +16,7 @@ Scope: the deployed request path in `worker-v3.js`
 | CORS | API responses allow every origin. | Unchanged to preserve current clients. | Maintain an approved-origin policy before authenticated browser endpoints are introduced. |
 | Rate limiting | The deployed Worker path does not invoke the repository rate-limiter service. | Unchanged; requires architecture decision. | Add route-specific enforcement, especially for POST endpoints, before broader launch. |
 | Analytics status | The `finally` block records status 200 regardless of the actual response. | Not changed because correcting it requires restructuring response flow. | Capture the actual response status in a focused follow-up. |
+| Public metadata | `/health` advertised advanced capability and availability claims that were not established by the operational check; `/api` labeled every environment as production. | Limit `/health` to operational/version facts and make `/api` distinguish implemented routes from verified quality claims. | Define measurable capability criteria before adding feature-level health assertions. |
 
 ## Limits and interpretation
 

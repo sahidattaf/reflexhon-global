@@ -56,18 +56,12 @@ export default {
 
       if (path === '/health') {
         return jsonResponse({
-          status: 'healthy',
+          status: 'ok',
           version: '3.0.0',
           codename: 'Cultural Intelligence',
           timestamp: new Date().toISOString(),
-          uptime: 'Serverless (always available)',
-          features: {
-            reflexion_engine: '5-layer reasoning',
-            papiamentu_nlp: '3 dialects (Aruba, Bonaire, Curaçao)',
-            emotion_analysis: 'Caribbean-calibrated',
-            memory_learning: '10-dimension scoring',
-            analytics: 'Real-time monitoring'
-          }
+          runtime: 'Cloudflare Workers',
+          scope: 'Operational health and version metadata only'
         }, corsHeaders);
       }
 
@@ -111,9 +105,8 @@ export default {
           name: 'Reflexhon Global API',
           version: '3.0.0',
           codename: 'Cultural Intelligence',
-          tagline: 'The AI that thinks like a Caribbean',
-          status: 'production',
-          deployed: new Date().toISOString(),
+          description: 'Human-centered cultural intelligence API',
+          verification_note: 'This response lists implemented routes, not verified quality or performance claims.',
           endpoints: {
             health: '/health',
             api_info: '/api',

@@ -3,6 +3,41 @@ import worker, { parseJsonBody } from '../worker-v3.js';
 const context = { waitUntil: () => {} };
 
 describe('Worker request validation', () => {
+  test('health reports operational metadata without unsupported capability claims', async () => {
+    const response = await worker.fetch(
+      new Request('https://example.test/health'),
+      { NODE_ENV: 'production' },
+      context
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      status: 'ok',
+      version: '3.0.0',
+      runtime: 'Cloudflare Workers'
+    });
+    expect(body).not.toHaveProperty('features');
+    expect(body).not.toHaveProperty('uptime');
+  });
+
+  test('API information distinguishes implemented routes from verified claims', async () => {
+    const response = await worker.fetch(
+      new Request('https://example.test/api'),
+      { NODE_ENV: 'production' },
+      context
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.version).toBe('3.0.0');
+    expect(body.verification_note).toMatch(/implemented routes/i);
+    expect(body.endpoints.reflexion).toBe('POST /api/v1/reflexion');
+    expect(body).not.toHaveProperty('status');
+    expect(body).not.toHaveProperty('deployed');
+    expect(body).not.toHaveProperty('tagline');
+  });
+
   test('accepts a JSON object within the payload limit', async () => {
     const request = new Request('https://example.test/api/v1/reflexion', {
       method: 'POST',
