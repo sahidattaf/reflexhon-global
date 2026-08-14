@@ -2,7 +2,9 @@
 
 **Release Date:** January 13, 2026
 **Codename:** Cultural Intelligence
-**Status:** ✅ Production Ready
+**Status:** Historical release record; current production behavior and quality claims require independent verification
+
+> **Verification notice (2026-08-12):** Live `/health` and `/api` report v3.0.0. Before the P0 fixes on `docs/p0-truth-sync`, repeated test runs produced 2–3 failures among 44 tests and lint reported 483 errors. The P0 branch establishes a passing 51-test baseline and zero lint errors, with 61 warnings retained as technical debt. Numerical performance, accuracy, dataset-count, code-size, and historical pass-rate statements below remain unverified release claims. Advanced modules exist in the repository, while `worker-v3.js` states that several are not fully integrated into the deployed request path.
 
 ---
 

@@ -1,13 +1,13 @@
 {
   "name": "reflexhon-global",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Reflexhon Global - Cloud API Layer for Cultural Alignment",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --passWithNoTests",
     "lint": "eslint .",
     "deploy": "npx wrangler deploy",
     "deploy:dev": "npx wrangler dev",

@@ -169,11 +169,12 @@ Create a warm, culturally-aligned response that Caribbean Papiamentu speakers wi
    * Response Templates by Approach
    */
   getResponseTemplate(approach, intent, culturalContext) {
+    const context = culturalContext || {};
     const templates = {
       direct_explanation: {
         placeholder: 'Providing clear, direct answer with cultural context...',
         structure: 'greeting + direct_answer + cultural_context + closing',
-        tone: culturalContext.formality > 0.6 ? 'respectful' : 'friendly'
+        tone: context.formality > 0.6 ? 'respectful' : 'friendly'
       },
 
       story_metaphor: {

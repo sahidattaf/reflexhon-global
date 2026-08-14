@@ -9,7 +9,8 @@
  */
 
 class PreferenceLearning {
-  constructor() {
+  constructor(database = null) {
+    this.db = database;
     // In-memory preference cache
     this.preferenceCache = new Map();
 
@@ -423,8 +424,8 @@ class PreferenceLearning {
       }
 
       // Try to load from D1 database (if available)
-      if (typeof DB !== 'undefined' && DB) {
-        const result = await DB.prepare(
+      if (this.db) {
+        const result = await this.db.prepare(
           'SELECT preferences FROM user_preferences WHERE session_id = ?'
         ).bind(sessionId).first();
 
@@ -459,8 +460,8 @@ class PreferenceLearning {
       this.preferenceCache.set(sessionId, preferences);
 
       // Save to D1 database (if available)
-      if (typeof DB !== 'undefined' && DB) {
-        await DB.prepare(`
+      if (this.db) {
+        await this.db.prepare(`
           INSERT INTO user_preferences (session_id, preferences, updated_at)
           VALUES (?, ?, ?)
           ON CONFLICT(session_id) DO UPDATE SET
@@ -605,8 +606,8 @@ class PreferenceLearning {
    */
   async storeLearningEvent(sessionId, learningData) {
     try {
-      if (typeof DB !== 'undefined' && DB) {
-        await DB.prepare(`
+      if (this.db) {
+        await this.db.prepare(`
           INSERT INTO learning_events (session_id, event_data, confidence, created_at)
           VALUES (?, ?, ?, ?)
         `).bind(
@@ -631,8 +632,8 @@ class PreferenceLearning {
    */
   async getLearningHistory(sessionId, limit = 20) {
     try {
-      if (typeof DB !== 'undefined' && DB) {
-        const results = await DB.prepare(`
+      if (this.db) {
+        const results = await this.db.prepare(`
           SELECT * FROM learning_events
           WHERE session_id = ?
           ORDER BY created_at DESC

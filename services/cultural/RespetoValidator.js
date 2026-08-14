@@ -57,7 +57,7 @@ class RespetoValidator {
     this.disrespectPatterns = {
       // Direct commands without softening
       harsh_commands: [
-        /^(hasi|kome|bai|para|sali) [^\?]/i, // Do X without please
+        /^(hasi|kome|bai|para|sali) [^?]/i, // Do X without please
         /^(no|stop|ketu)/i // Harsh negatives
       ],
 
