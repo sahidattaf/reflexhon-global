@@ -1,4 +1,3 @@
-mv CODE_OF_CONDUCT.md path/to/reflexhon-global/
 # 🌈 Reflexhon Global – Code of Conduct
 
 🤝 **Un AI ku ta reflehá humanidad, mester siña respetá humanidad.**
@@ -35,7 +34,7 @@ Este kodígo ta apliká den:
 - Issues, Pull Requests, Wiki edits
 - Reflexhon Deck, Notion integrashon
 - Diskushonnan publik of privat
-- DAO votashon, meetings, of propuestas
+- Vòtashon di komunidat, reunion, of propuestas
 
 ---
 
@@ -50,7 +49,7 @@ Si bo ta sinti bo no ta den un espasio seguro:
 
 ## 🧠 Konsekuensia
 
-Organisadó (DAO leads) por tuma pasonan inklusá:
+Organisadó (koordinadornan di komunidat) por tuma pasonan inklusá:
 
 - Notifikashon informal
 - Aviso publik/privat
@@ -65,9 +64,15 @@ Este Código ta basá riba [Contributor Covenant v2.1](https://www.contributor-c
 
 - Reflexhon Human-Centered AI
 - Kultura lokal i plurilíngue
-- DAO i ekosistema kontribushonal
+- Komunidat i ekosistema kontribushonal
 
 ---
 
-> “AI sin empatia ta útil. AI ku empatia ta humano.”  
+## 🪙 Future governance and token ideas (not part of this beta)
+
+Community-governance and token concepts (including the working names "ReflexCoin" and "ReflexPoints") are not implemented, not offered, not promised, and not transferable today. Any future decision to build them would require separate legal, tax, governance, and economic review before anything is announced. Until and unless that happens, they create no financial entitlement of any kind.
+
+---
+
+> "AI sin empatia ta útil. AI ku empatia ta humano."
 > — Reflexhon Global 🌞
